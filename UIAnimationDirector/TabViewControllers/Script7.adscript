@@ -1,0 +1,73 @@
+scene(0)
+{
+    resources:"res/resource/Introduction2/"
+    setInfiniteRunloop:1
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setDefaultTimingFunction:"linear"
+    setDefaultDuration:1
+    
+    for(index, [1, 5]):object("background%d", [index]):image:("guide_b%d", [index])
+    for(index, [1, 5]):object("background%d", [index]):origin:((index - 1) * parent.DIMENSION_WIDTH, 0)
+    
+    object("document1")
+    {
+        image:"guide1_3"
+        animate:(key:"transform.translation.x", by:parent.DIMENSION_WIDTH * 2 + 20, manually:"move")
+        animate:(key:"opacity", to:0, beginTime:1, manually:"move", duration:0.01)
+    }
+    object("document2")
+    {
+        image:"guide1_1"
+        animate:(key:"transform.translation.x", by:parent.DIMENSION_WIDTH * 2 + 250, manually:"move")
+        animate:(key:"opacity", to:0, beginTime:1, manually:"move", duration:0.01)
+    }
+    object("left_hand")
+    {
+        image:"guide3_3"
+        origin:(2 * parent.DIMENSION_WIDTH + 100, 0)
+        animate:(key:"transform.translation.x", by:-100, beginTime:1, manually:"move")
+        sendToBack:
+    }
+    object("group1")
+    {
+        parent:object("background4")
+        image:"guide4_1"
+        origin:(parent.DIMENSION_WIDTH + 150, 0)
+        animate:(key:"transform.translation.x", by:-parent.DIMENSION_WIDTH - 17 - 150, beginTime:2, manually:"move")
+    }
+    object("group2")
+    {
+        parent:object("background4")
+        image:"guide4_2"
+        origin:(parent.DIMENSION_WIDTH, 0)
+        animate:(key:"transform.translation.x", by:-parent.DIMENSION_WIDTH - 5, beginTime:2, manually:"move")
+    }
+    object("group3")
+    {
+        parent:object("background4")
+        image:"guide4_3"
+        origin:(parent.DIMENSION_WIDTH + 50, 0)
+        animate:(key:"transform.translation.x", by:-parent.DIMENSION_WIDTH - 65, beginTime:2, manually:"move")
+        animate:(key:"transform.translation.x", by:-30, beginTime:3, manually:"move")
+    }
+    object("background5")
+    {
+        origin:(3 * parent.DIMENSION_WIDTH, parent.DIMENSION_HEIGHT)
+        animate:(key:"transform.translation", by:(parent.DIMENSION_WIDTH, -parent.DIMENSION_HEIGHT), beginTime:3, manually:"move")
+    }
+    
+    for(index, [1, 6]):object("flyin%d", [index]):image:("guide5_%d", [index])
+    for(index, [1, 6]):object("flyin%d", [index]):origin:((5 + index - 1) * parent.DIMENSION_WIDTH, -parent.DIMENSION_HEIGHT / 2)
+    for(index, [1, 6]):object("flyin%d", [index]):animate:(key:"transform.translation", by:(-(index * parent.DIMENSION_WIDTH), parent.DIMENSION_HEIGHT / 2), beginTime:3, manually:"move")
+
+    object("head1")
+    {
+        image:"guide_pic"
+        origin:(15, 242)
+        animateGroup:(animations:[(key:"transform.translation", by:(parent.DIMENSION_WIDTH + 20, -190)), (key:"transform.scale", from:0.3, to:1), (key:"transform.rotation", from:0, to:-2 * PI)], manually:"move")
+        animateGroup:(animations:[(key:"transform.translation", by:(parent.DIMENSION_WIDTH + 104, 65)), (key:"transform.scale", from:1, to:0.35), (key:"transform.rotation", from:0, to:2 * PI - PI / 7)], beginTime:1, manually:"move")
+        animateGroup:(animations:[(key:"transform.translation", by:(parent.DIMENSION_WIDTH - 110, -15)), (key:"transform.scale", by:-0.05), (key:"transform.rotation", by:PI / 7)], beginTime:2, manually:"move")
+        animateGroup:(animations:[(key:"transform.translation", by:(parent.DIMENSION_WIDTH + 3, 25)), (key:"transform.scale", to:0.125)], beginTime:3, manually:"move")
+    }
+}

@@ -1,0 +1,65 @@
+# 模仿微信下雪的动画
+scene(0)
+{
+    resources:"res/resource/"       # 如果资源图片不在main bundle里，需要指定路径
+    image:"background.jpg"
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    
+    # MACRO:MAX_SNOW                # 外部定义的宏，这句只是注释，不会有任何作用
+    var(SNOW_FALL_TIME, 50)         # 雪花整个下落时间是50秒
+    
+    event("runLoop")
+    {
+        # 雪花的呼吸加旋转动画，函数是可以嵌套着写的，无所谓            
+        event("startBreath", ["snow", "minScale"])
+        {
+            object(snow):animate:(key:"transform.scale", from:minScale, to:minScale + 0.3, duration:6, timingFunction:"linear", repeatCount:100, autoreverses:1)
+            object(snow):animate:(key:"transform.rotation", duration:10, by:PI / 4, repeatCount:100, autoreverses:1)
+        }
+
+        # 随机生成一些雪花
+        localObject("snow")
+        {
+            localVar(randomImage, RANDOM)
+            if(randomImage < 0.333):image:"snow.png"
+            if(randomImage >= 0.333 & randomImage < 0.666):image:"snow2.png"
+            if(randomImage >= 0.666):image:"snow3.png"
+            center:(RANDOM * 320, RANDOM * 40)
+                
+            # 雪花的呼吸系数
+            localVar(minScale, RANDOM)
+            if(minScale < 0.4)
+            {
+                localVar(minScale, 0.4)
+            }
+            if(minScale > 0.7)
+            {
+                localVar(minScale, 0.7)
+            }
+
+            animateGroup:(duration:4, animations:[(key:"opacity", from:0, to:1), (key:"transform.scale", to:minScale)], stopEvent:("startBreath", [localObject("snow"), minScale]))  # 当雪花渐出后，开始进行放大缩小的呼吸动画
+
+            # 雪花下降的动画
+            animate:(key:"transform.translation", duration:SNOW_FALL_TIME + (RANDOM * 2 - 1) * 10, by:((RANDOM * 2 - 1) * 20, parent.DIMENSION_HEIGHT - DIMENSION_Y), timingFunction:"linear", stopEvent:("removeSnow", [localObject("snow")]))
+        }
+
+        event("removeSnow", ["snow"])
+        {
+            object(snow):free:
+            var(snowCount, snowCount - 1)
+            invoke:("printSnowCount", [snowCount])
+        }
+            
+        var(snowCount, snowCount + 1)                     # 雪花数加1，通知代理显示
+        invoke:("printSnowCount", [snowCount])
+        
+        event(SNOW_FALL_TIME / MAX_SNOW)                  # 执行下个runLoop
+        {
+            event:"runLoop"
+        }
+    }
+    
+    var(snowCount, 0)       # 这个变量记录雪花总数
+    event:"runLoop"         # 开始执行循环
+}

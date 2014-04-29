@@ -1,0 +1,18 @@
+//
+//  main.m
+//  UIAnimationDirector
+//
+//  Created by 王 乾元 on 12/15/12.
+//  Copyright (c) 2012 王 乾元. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#import "AppDelegate.h"
+
+int main(int argc, char *argv[])
+{
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    }
+}

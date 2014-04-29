@@ -1,0 +1,379 @@
+# iPhone QQ 2.2版本功能介绍动画脚本
+# created by bruiswang on 12-10-12
+
+# 由于iPhone5屏幕高度变了，所以这里动画对象的坐标不能使用绝对坐标了，一些地方需要使用相对坐标，相对坐标是一个小于1的浮点数加r后缀表示
+# 有一个潜规则，如果创建物体后，从未设置过其size，那么第一次加载图片后会把它的size调整到图片的size。
+# 写脚本时event的时间不需要按顺序，怎么写都行；尽量使用event嵌套的方式实现相对时间动画，这样设计变更动画时可能的修改会比较小。
+# 任何地方的表达式均支持四则运算，四则运算表达式里可以使用宏
+# keyframe动画里，values里的内容由用户自己掌握，比如对transform进行动画，后面的参数就是三个数组成一帧的数据: animate:(key:"transform", duration:0.2, values:[(0.1, 0.1, 1.0), (1.2, 1.2, 1.0)])
+# 如果是对bounds作动画，后面需要是四个数一组的数据，组成CGRect
+# invoke可以调用OC的方法，格式为invoke:"方法名"或invoke:("方法名", [参数数组])，比如invoke:("registerObjects", [object("1"), object("2")])会把两个物体组成的数组返回
+
+scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相对于scene的相对时间
+{
+    resources:"res/resource/Introduction/"
+
+    # 设置动画默认属性，设置后在接下来的animate参数里就不用填了。这里是创建scene的时候就进行这个初始化，之后想改变这个默认值，可以在event里写。
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setDefaultTimingFunction:"easeOut"
+    setInfiniteRunloop:0
+    
+    object("background")
+    {
+        rect:(0r, 0r, 1r, 1r)
+        image:"intro_bg.jpg"                    # 背景
+    }
+
+    event(0.5)                                  # 0.5秒时出现第一条聊天记录
+    {
+        object("chat1")
+        {
+            parent:object("background")
+            anchor:(0.022, 0.8)
+            origin:(22, 25)
+            image:"intro_chat_1.png"
+            animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
+        }
+
+        event(1)                                    # 下面的桌子，在第一第聊天记录出现1秒后出现
+        {
+            object("table")
+            {
+                parent:object("background")         # 成为背景物体的子view
+                origin:(0r, 1r)                     # 移到屏幕下边缘
+                image:"intro_table.png"
+                animateGroup:(duration:0.2, timingFunction:"linear", animations:[(key:"transform.translation.y", by:-170), (key:"opacity", from:0, to:1)])       # 桌子的动画是从下面浮现上来，同时透明度从0到1
+            }
+            
+            event(0.2)                              # 桌子出现0.2秒后出现火锅
+            {
+                object("pot")
+                {
+                    parent:object("table")          # 父view为桌子
+                    anchor:(0.5, 0.5)
+                    image:"intro_bowl_nor.png"
+                    center:(0.5r, 0.35r)
+                    animateGroup:(duration:0.15, animations:[(key:"transform.scale", values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1]), (key:"opacity", from:0, to:1)])
+                }
+            }
+        
+            event(0.5)                              # 第一根筷子在桌子出现0.5秒后出现
+            {
+                object("chopsticks1")
+                {
+                    parent:object("table")
+                    image:"intro_chopstick_1.png"
+                    origin:(0.09r, 0.45r)
+                    animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+                }
+            }
+            
+            
+            event(1.5)                              # 第二条聊天记录，在桌子出现1.5秒后出现
+            {
+                object("chat2")                         
+                {
+                    parent:object("background")
+                    anchor:(0.975, 0.4)
+                    origin:(115, object("chat1").DIMENSION_BOTTOM + 5)
+                    image:"intro_chat_2.png"
+                    animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
+                }
+        
+                event(0.7)                              # 这个吃货的筷子在图标出现0.7秒后出现
+                {
+                    object("chopsticks2")               # 第二根筷子
+                    {
+                        parent:object("table")
+                        image:"intro_chopstick_2.png"
+                        origin:(0.33r, 0.59r)
+                        animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+                    }
+                }
+            }
+        }
+    }
+    
+    event(4)
+    {
+        object("chihuo1")                       # 第一个吃货的头像
+        {
+            parent:object("background")
+            image:"intro_chat_join_2.png"
+            center:(0.5r, DIMENSION_CENTER_Y)
+            origin:(DIMENSION_X, object("chat2").DIMENSION_BOTTOM + 25)
+        }
+        
+        object("joinGroup")                     # 加入讨论组的文字
+        {
+            parent:object("chihuo1")            # 以吃货1的头像为父view，后面上移和淡出动画就不用写了
+            image:"intro_chat_join_word.png"
+            center:(0.5r, 1.25r)
+        }
+        
+        object("chopsticks3")
+        {
+            parent:object("table")
+            image:"intro_chopstick_3.png"
+            origin:(0.65r, 0.55r)
+            animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+        }
+        
+        event(0.2)                              # 第二个吃货的头像在第一个出现0.2秒后出现
+        {
+            object("chihuo2")
+            {
+                parent:object("chihuo1")        # 以吃货1的头像为父view，后面上移和淡出动画就不用写了
+                image:"intro_chat_join_1.png"
+                center:(-0.8r, 0.65r)
+            }
+
+            object("chopsticks4")
+            {
+                parent:object("table")
+                image:"intro_chopstick_4.png"
+                origin:(0.79r, 0.42r)
+                animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+            }
+        }
+        
+        event(0.4)                              # 第三个吃货的头像在第一个出现0.4秒后出现
+        {
+            object("chihuo3")                       
+            {
+                parent:object("chihuo1")        # 以吃货1的头像为父view，后面上移和淡出动画就不用写了
+                image:"intro_chat_join_3.png"
+                center:(2r, 0.70r)
+            }
+        
+            object("chopsticks5")
+            {
+                parent:object("table")
+                image:"intro_chopstick_5.png"
+                origin:(0.025r, 0.2r)
+                animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+            }
+        }
+    }
+    
+    event(5.5)
+    {
+        object("chat3")                         # 第三条聊天记录
+        {
+            parent:object("background")
+            anchor:(0.01, 0.46)
+            origin:(13, object("chihuo1").DIMENSION_CENTER_Y)
+            image:"intro_chat_4.png"
+            animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
+        }
+        
+        event(0.7)                              # 这个吃货的筷子在图标出现0.7秒后出现
+        {
+            object("chopsticks6")
+            {
+                parent:object("table")
+                image:"intro_chopstick_6.png"
+                origin:(0.84r, 0.2r)
+                animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+            }
+        }
+        
+        # 其它物体向上移动
+        object("chat1"):animateGroup:(duration:0.15, animations:[(key:"transform.translation.y", by:-75), (key:"opacity", to:0)])
+        object("chat2"):animate:(key:"transform.translation.y", duration:0.15, by:-75)
+        object("chihuo1"):animate:(key:"transform.translation.y", duration:0.15, by:-75)
+        
+        event(1.5)                                  # 第四条聊天记录在第三条1.5秒后出现
+        {
+            object("chat4")                         
+            {
+                parent:object("background")
+                anchor:(0.9684, 0.519)
+                origin:(125, object("chat3").DIMENSION_Y)
+                image:"intro_chat_5.png"
+                animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
+            }
+        
+            event(0.7)                              # 这个吃货的筷子在图标出现0.7秒后出现
+            {
+                object("chopsticks7")
+                {
+                    parent:object("table")
+                    image:"intro_chopstick_7.png"
+                    origin:(0.30r, -0.1r)
+                    animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+                }
+                
+                object("food1")
+                {
+                    parent:object("pot")
+                    image:"intro_food1.png"
+                    center:(0.1r, -45)
+                }
+                    
+                event(0.2)
+                {
+                    object("food2")
+                    {
+                        parent:object("pot")
+                        image:"intro_food2.png"
+                        center:(0.5r, -45)
+                    }
+                    
+                    event(0.2)
+                    {
+                        object("food3")
+                        {
+                            parent:object("pot")
+                            image:"intro_food3.png"
+                            center:(0.9r, -45)
+                        }                     
+                    }
+                    
+                    event(0.6)                  # 三种食物一起飞到锅里
+                    {
+                        for(index, [1, 3]):object("food%d", [index]):animateGroup:(duration:0.3, animations:[(key:"position", to:(object("pot").DIMENSION_WIDTH / 2, object("pot").DIMENSION_HEIGHT / 2)), (key:"opacity", from:1, to:0.5)])
+
+                        event(0.2)              # 0.2秒后锅里出现汤
+                        {
+                            for(index, [1, 3]):object("food%d", [index]):hide:
+                                
+                            object("soup1")                     # 锅里的汤
+                            {
+                                parent:object("pot")
+                                image:"intro_bowl_plus_1.png"
+                                center:(0.5r, 0.5r)
+                                animate:(key:"opacity", duration:0.1, from:0, to:1)
+                            }
+                            object("soup2")                     # 锅里的汤2
+                            {
+                                parent:object("pot")
+                                image:"intro_bowl_plus_2.png"
+                                center:(0.5r, 0.5r)
+                                animate:(key:"opacity", duration:0.1, from:0, to:1)
+                            }
+                        }
+                    }
+                }
+            }
+        
+            # 其它物体向上移动
+            object("chat2"):animateGroup:(duration:0.15, animations:[(key:"transform.translation.y", by:-65), (key:"opacity", to:0)])
+            object("chat3"):animate:(key:"transform.translation.y", duration:0.15, by:-65)
+            object("chihuo1"):animate:(key:"transform.translation.y", duration:0.15, by:-65)
+            
+            event(2.5)                              # 第五条聊天记录在第四条1.5秒后出现
+            {
+                object("chat5")                         
+                {
+                    parent:object("background")
+                    anchor:(0.0286, 0.614)
+                    origin:(20, object("chat4").DIMENSION_Y)
+                    image:"intro_chat_6.png"
+                    animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
+                }
+        
+                # 其它物体向上移动
+                object("chihuo1"):animateGroup:(duration:0.15, animations:[(key:"transform.translation.y", by:-65), (key:"opacity", to:0)])
+                for(index, [3, 4]):object("chat%d", [index]):animate:(key:"transform.translation.y", duration:0.15, by:-65)
+        
+                event(0.3)                              # 第5条聊天记录出现0.3秒后，显示lbs图标
+                {
+                    object("lbs")
+                    {
+                        parent:object("chat5")
+                        image:"intro_chat_6_geo.png"
+                        center:(0.6r, 0.5r)
+                        animate:(key:"transform.translation.x", duration:0.15, by:75)
+                    }
+        
+                    event(0.15)                                 # lbs闪烁图标在lbs图标显示出来0.15秒后出现
+                    {
+                        object("lbs_em")                        # lbs图标外面放射状的，做闪烁。
+                        {
+                            parent:object("lbs")
+                            image:"intro_chat_6_em.png"
+                            center:(1.1r, -3)
+                            flash:(interval:0.15, count:6)      # 开始闪烁，改变6次状态
+                        }
+                    }
+                }
+        
+                event(0.7)                                      # 这个吃货的筷子在图标出现0.7秒后出现
+                {
+                    object("chopsticks8")
+                    {
+                        parent:object("table")
+                        image:"intro_chopstick_8.png"
+                        origin:(0.65r, -0.1r)
+                        animateGroup:(duration:0.1, animations:[(key:"transform.translation.y", by:20), (key:"opacity", from:0, to:1)])
+                    }
+                }
+                
+                event(1.8)      # 最后一条聊天记录出现1.5秒后scene淡出，因为所有物体都创建在background上，直接对background淡出就行
+                {
+                    object("background"):animate:(key:"opacity", duration:0.5, to:0)
+                    event(0.5):hide:
+                }
+            }
+        }
+    }
+}
+
+scene(10.8)      # 第二个场景
+{
+    resources:"res/resource/Introduction/"
+
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setDefaultTimingFunction:"easeOut"
+    
+    sendToBack:     # 创建第二个场景，但是先移到第一个场景后面
+    backgroundColor:(0.95, 0.95, 0.95, 1)
+
+    event(1)
+    {
+        bringToFront:
+
+        object("groupLogo")
+        {
+            image:"intro_logo.png"
+            center:(0.5r, 0.3r)
+        }
+        
+        object("cover")     # 遮挡logo的
+        {
+            backgroundColor:(0.95, 0.95, 0.95, 1)
+            size:(60, 60)
+            center:(0.5r, 0.3r)
+            animate:(key:"transform.translation.x", duration:0.2, by:-60)
+        }
+        
+        event(0.7)
+        {
+            object("cover"):hide:
+
+            object("textCover")     # 遮挡讨论组文字的遮罩
+            {
+                sendToBack:
+                backgroundColor:(0.95, 0.95, 0.95, 1)
+                size:(100, 50)
+                center:(0.4r, 0.3r)
+                animate:(key:"transform.translation.x", duration:0.2, by:-75)
+            }
+
+            object("text")          # 讨论组文字
+            {
+                sendToBack:
+                image:"intro_name.png"
+                center:(0.4r, 0.3r)
+                animate:(key:"transform.translation.x", duration:0.2, by:75)
+            }
+            
+            object("groupLogo"):animate:(key:"transform.translation.x", duration:0.2, by:-60)
+        }
+        
+        event(1.2):object("textCover"):hide:
+    }
+}

@@ -1,0 +1,74 @@
+scene(0)    # 0秒时显示场景1
+{
+    # 接下来的resources，image，setDefaultFillMode等方法都是scene的方法，具体有哪些可以看UIAnimationDirector+Operation.m的UIADScene类
+    resources:"main bundle"                 # 表示接下来涉及的图片资源来自main bundle，直到碰到下一个设置resources的地方
+    image:"bundle_bg.jpg"                   # 设置这个场景的背景，这个背景会一直存在。直接设置scene的背景图片不常用，通常我们会单独创建一个物体放在最低层做为背景
+    setDefaultFillMode:"forwards"           # 统一设置接下来的动画填充模式都为forwards，表示动画完成后保持最后一帧的状态
+    setDefaultRemovedOnCompletion:0         # 统一设置接下来的动画在完成后并不removed掉
+    setDefaultTimingFunction:"easeOut"      # 统一设置接下来的动画都使用easeOut的插值方式
+    
+    object("container")                     # 创建一个存放以下控件的container，不创建也可，那样物体就直接放在scene里了
+    {
+        backgroundColor:(0, 0, 0, 0)        # 让这个container透明，但是这个container的alpha是1，一会用于动画
+        rect:(0, 0, 1r, 1r)                 # 数字后面的r表示相对坐标，第一个1r出现在rect的width位置，表示宽度是1*父容器的宽度；这一句实际就是让container充满整个
+    }
+
+    # 接下来我们显示一些物体
+    object("btn1")                          # 这个物体直接放在scene域里了，表示它将在与场景同时出现
+    {
+        parent:object("container")          # 创建在container里
+        image:"btn_video.png"               # 指定潜规则，如果物体的尺寸没有被设置过，那么指定图片后，会把物体默认设置到图片的原始尺寸。调用size，rect方法会表示物体的尺寸被设置过
+        origin:(5, 5)                       # 把物体放置到坐标(5, 5)处
+    }                                       # 由于未设置过btn1物体的parent，所以它的parent将是scene；也没设置过它的动画，那么它将直接显示在场景里
+    
+    event(1)                                # 1秒后我们在btn1的右边显示另一个btn
+    {
+        object("btn2")
+        {
+            parent:object("container")
+            image:"btn_video.png"
+            center:(object("btn1").DIMENSION_CENTER_X + DIMENSION_WIDTH + 5, object("btn1").DIMENSION_CENTER_Y)     # 脚本支持四则运算，这段代码的意思是把btn2的中心设置为btn1的中心加上自己的尺寸再加上空隙5像素，Y坐标相同；这里使用了访问对象属性的宏，具体有哪些可以看UIAnimationDirector+Operation.m的valueFromMacro方法
+            animate:(key:"opacity", duration:0.2, from:0, to:1)     # 对这个按钮做一个渐入动画
+        }
+        
+        event(1)                            # btn2出现1秒后，在btn2右边再显示一个btn，这个event是嵌套在另一个event里，时间是相对的
+        {
+            object("btn1"):flash:(interval:0.5, count:6)            # btn1闪烁6次，间隔是0.5秒，显示、消失事件都算一次闪烁
+
+            object("btn3")
+            {
+                parent:object("container")
+                image:"btn_video.png"
+                animateGroup:(duration:0.5, animations:[(key:"transform.scale", from:0, to:1), (key:"opacity", from:0, to:1), (key:"transform.translation", to:(object("btn2").DIMENSION_X + DIMENSION_WIDTH + 5, object("btn2").DIMENSION_Y))])          # 对这个物体执行一个动画组，分别是尺寸比率从0到1，透明度从0到1，坐标从当前位置移动到btn2右边。最后一个动画的to参数需要CGPoint类型，所以需要把两个数值放到数组里，用小括号括起来
+            }
+            
+            event(1)                        # 又过了一秒，再显示一个btn，这个btn执行一个关键帧动画
+            {
+                object("btn4")
+                {
+                    parent:object("container")
+                    image:"btn_video.png"
+                    anchor:(0, 1)           # 设置动画的锚点为左下角
+                    origin:(object("btn2").DIMENSION_X + DIMENSION_WIDTH * 2 + 10, object("btn2").DIMENSION_Y)
+                    animate:(key:"transform.scale", duration:0.8, values:(0, 1, 1.4, 1))        # 执行关键帧动画，实现伸缩的效果
+                }
+                
+                event(1)
+                {
+                    object("bnt5")
+                    {
+                        parent:object("btn4")       # 把btn5放在btn4里面
+                        image:"btn_video.png"
+                        animate:(key:"transform.translation.x", duration:1, to:DIMENSION_WIDTH + 5, stopEvent:"fadeout")        # 当btn5的动画结束时，执行事件"fadeout"
+                    }
+                }
+            }
+        }
+    }
+    
+    event("fadeout")
+    {
+        # btn5的动画结束时执行事件fadeout，再延迟1秒所有btn淡出
+        event(1):object("container"):animate:(key:"opacity", duration:1, to:0)
+    }
+}

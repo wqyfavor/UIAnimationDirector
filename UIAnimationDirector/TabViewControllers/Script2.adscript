@@ -1,0 +1,77 @@
+# 这个脚本用来展示脚本引擎的函数调用
+# invoke、event方法第一个参数是方法名，第二个是参数表，需要用数组括起来，支持复杂类型
+scene(0)
+{
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setDefaultTimingFunction:"linear"
+    
+    event("tick", ["time"])
+    {
+        invoke:("triggerEvent", [time])     # invoke是调用delegate的OC方法
+        event(2)
+        {
+            event:("tick", [time + 2])      # 递归调用，显示两秒后的时间
+        }
+    }
+    event:("tick", [0])
+
+    # 下面一个例子把对象做为参数，让这个对象不断切换两种动画
+    object("btn1")
+    {
+        image:"btn_video.png"
+        center:(0.25r, 0.5r)
+    }
+
+    event("animate1", ["obj", "angle"])
+    {
+        event(1)
+        {
+            object(obj):animate:(key:"transform.scale", duration:1.5, to:0)
+            
+            event(3)
+            {
+                object(obj):animate:(key:"transform.scale", duration:1.5, to:1, stopEvent:("animate2", [object(obj), angle]))     # animate1结束时调用animate2，并把对象传给animate2的方法，这里传对象时，要使用[object(obj)]的语法
+            }
+        }
+    }
+    
+    event("animate2", ["obj", "angle"])
+    {
+        event(1)
+        {
+            object(obj):animate:(key:"transform.rotation", duration:1.5, by:angle)
+            
+            event(3)
+            {
+                object(obj):animate:(key:"transform.rotation", duration:1.5, by:-angle, stopEvent:("animate1", [object(obj), angle]))
+            }
+        }
+    }
+    
+    event:("animate1", [object("btn1"), PI * 2])        # 这里改成-PI * 2可以让animate2反向运行
+
+    # 下面这个例子会在函数里创建对象，然后将这个对象传给另一个函数
+    event("createObject", ["left", "top", "count"])
+    {
+        localObject("obj")
+        {
+            image:"btn_video.png"
+            origin:(left, top)
+            animate:(key:"transform.scale", duration:0.5, from:0, to:1.0)
+        }
+        
+        event(1)
+        {
+            event:("rotateObject", [localObject("obj")])
+            if(count < 3):event:("createObject", [left + localObject("obj").DIMENSION_WIDTH + 5, top + localObject("obj").DIMENSION_HEIGHT + 5, count + 1])  # 在右下角创建同样的物体并执行动画，最多创建三个
+        }
+    }
+    
+    event("rotateObject", ["obj"])
+    {
+        object(obj):animate:(key:"transform.rotation", duration:1.5, by:2 * PI)
+    }
+    
+    event:("createObject", [53, 20, 1])
+}

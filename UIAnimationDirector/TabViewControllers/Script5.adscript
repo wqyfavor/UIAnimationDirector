@@ -1,0 +1,94 @@
+scene(0)
+{
+    resources:"main bundle"
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setInfiniteRunloop:1
+    
+    var(ICON_WIDTH, 82)     # 图标size
+    var(ICON_HEIGHT, 89)     # 图标size
+    var(ICON_MARGIN, 15)    # 图标间距
+    var(MIN_OPACITY, 0.6)   # 图标最小不透明度
+    var(MAX_SCALE, 1.2)     # 图标最大的scale
+    var(LINE_COUNT, 5)      # 下方闪烁的线条的数目
+    const(INTERVAL, 0.2)
+
+    event("createObject", ["index", "centerX"])
+    {
+        object("icon%d", [index])
+        {
+            size:(ICON_WIDTH, ICON_HEIGHT)
+            image:("guide_tmall_icon_%d.png", [index])      # 加载对应的图片
+            center:(centerX, 105 + ICON_HEIGHT / 2)
+            animate:(key:"opacity", to:MIN_OPACITY)         # 创建图标后先调整到透明状态
+        }
+        
+        if(index == 2):event:("createObject", [index - 1, centerX - ICON_WIDTH - ICON_MARGIN])     # 创建两侧的图标
+        if(index == 2):event:("createObject", [index + 1, centerX + ICON_WIDTH + ICON_MARGIN])
+    }
+    event:("createObject", [2, SCREEN_WIDTH / 2])    # 创建3个图标
+    
+    event("flashIcon", ["index"])
+    {
+        if(index <= 3):event(0.3):object("icon%d", [index]):animateGroup:(duration:0.6, timingFunction:"linear", animations:[(key:"opacity", to:1), (key:"transform.scale", values:(1, MAX_SCALE, 1))], stopEvent:("flashIcon", [index + 1]))
+        if(index == 4):event(1):invoke:"scroll"
+    }
+
+    object("followAccount")
+    {
+        image:"guide_tmall_startup.png"
+        center:(SCREEN_WIDTH + SCREEN_WIDTH / 2 + 1.5, SCENE_HEIGHT - 15 - DIMENSION_HEIGHT / 2)
+        animate:(key:"opacity", to:0.0)
+    }
+
+    object("intro", "guide_tmall_bg_2.png"):center:(160, 280)
+    object("tmall_icon", "guide_tmall_bg_cat.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - DIMENSION_WIDTH) / 2, 95)
+    object("tmall_intro_page_2", "guide_tmall_bg_intro.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - DIMENSION_WIDTH) / 2, object("tmall_icon").DIMENSION_BOTTOM + 25)
+    
+    event("switchedView")
+    {
+        event(0.5):object("tmall_icon"):transit:(image:"guide_tmall_bg_2.0.png", duration:0.7, transition:"flipLeft")
+        event(1.0):event:"flashLines"
+    }
+    
+    event("createLine", ["index", "centerY"])
+    {
+        object("line%d", [index])
+        {
+            image:"guide_tmall_bg_line.png"
+            center:(SCREEN_WIDTH + SCREEN_WIDTH / 2, centerY)
+            hide:   # 先隐藏
+        }
+        if(index < LINE_COUNT):event:("createLine", [index + 1, centerY - 6])
+        if(index == LINE_COUNT):event:("showLine", [LINE_COUNT])    # 线段都创建好后，开始闪烁
+    }
+
+    event("showLine", ["step"])
+    {
+        object("line%d", [step]):show:
+        if(step > 1):event(INTERVAL):event:("showLine", [step - 1])
+        if(step == 1):event(INTERVAL):event:"hideLine"              # 隐藏所有线段，并隔一定时间再重新开始显示
+    }
+    event("hideLine")
+    {
+        for(index, [1, LINE_COUNT]):object("line%d", [index]):hide:
+        event(INTERVAL):event:("showLine", [LINE_COUNT])
+    }
+    
+    event("flashLines")
+    {
+        event:("createLine", [1, object("followAccount").DIMENSION_BOTTOM - 33])
+        object("followAccount"):animate:(key:"opacity", to:1.0)
+    }
+    
+    object("tap")   # 最下方检测用户点击的透明view
+    {
+        size:(80, 50)
+        center:(SCREEN_WIDTH + SCREEN_WIDTH / 2, SCENE_HEIGHT - 25)
+        tapEvent:"onTap"
+    }
+    event("onTap")
+    {
+        invoke:"enterFollowRecommend"   # 点击后进入收听推荐
+    }
+}

@@ -1,0 +1,14 @@
+scene(0)
+{
+    resources:"res/resource/"
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    
+    object("background")
+    {
+        rect:(10, 30, 300, 60)
+        image:"background.jpg"
+    }
+    
+    event(1.0):object("background"):marqueeTexts:(interval:1, texts:["Text1", "红米手机有金属灰、象牙白、中国红", "日前小米宣布将会在今天和腾讯QQ空间独家", "今天下午四点开始在QQ空间进行预约", "理器加上Imagination PowerVR SGX544", "应用处理器--28nm MTK四核1.5GHz"])
+}
