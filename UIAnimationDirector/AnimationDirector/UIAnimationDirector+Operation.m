@@ -1278,6 +1278,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         _defaultTimingFunction = [kCAMediaTimingFunctionDefault copy];
         _defaultRemovedOnCompletion = YES; // iOS SDK default value
         _defaultDuration = 0.25;
+        _defaultImageScale = 1.0f;
     }
     
     return self;
@@ -1413,7 +1414,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     return [str isEqualToString:@"image"] || [str isEqualToString:@"backgroundColor"] || [str isEqualToString:@"resources"] ||
         [str isEqualToString:@"bringToFront"] || [str isEqualToString:@"sendToBack"] || [str isEqualToString:@"hide"] || [str isEqualToString:@"show"] ||
         [str isEqualToString:@"setDefaultFillMode"] || [str isEqualToString:@"setDefaultRemovedOnCompletion"] || [str isEqualToString:@"setDefaultTimingFunction"] ||
-        [str isEqualToString:@"setDefaultDuration"] || [str isEqualToString:@"invoke"] || [str isEqualToString:@"event"] || [str isEqualToString:@"setInfiniteRunloop"] || [str isEqualToString:@"tapEvent"];
+        [str isEqualToString:@"setDefaultDuration"] || [str isEqualToString:@"invoke"] || [str isEqualToString:@"event"] || [str isEqualToString:@"setInfiniteRunloop"] || [str isEqualToString:@"tapEvent"] || [str isEqualToString:@"setDefaultImageScale"];
 }
 
 - (BOOL)isValidPropertyValueForProperty:(NSString*)name value:(UIADPropertyValue*)value
@@ -1431,7 +1432,8 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         ([name isEqualToString:@"setDefaultDuration"] && value.type == UIAD_PROPERTY_VALUE_NUMBER) ||
         (([name isEqualToString:@"invoke"] || [name isEqualToString:@"event"]) && (value.type == UIAD_PROPERTY_VALUE_STRING || value.type == UIAD_PROPERTY_VALUE_ARRAY)) ||
         ([name isEqualToString:@"setInfiniteRunloop"] && value.type == UIAD_PROPERTY_VALUE_NUMBER) ||
-        ([name isEqualToString:@"tapEvent"] && (value.type == UIAD_PROPERTY_VALUE_STRING || value.type == UIAD_PROPERTY_VALUE_ARRAY));
+        ([name isEqualToString:@"tapEvent"] && (value.type == UIAD_PROPERTY_VALUE_STRING || value.type == UIAD_PROPERTY_VALUE_ARRAY)) ||
+        ([name isEqualToString:@"setDefaultImageScale"] && value.type == UIAD_PROPERTY_VALUE_NUMBER);
 }
 
 - (BOOL)setPropertyValue:(NSString*)name value:(UIADPropertyValue*)value context:(UIADOperationContext*)context
@@ -1673,6 +1675,15 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
                 }
             }
         }
+    }
+    else if ([name isEqualToString:@"setDefaultImageScale"])
+    {
+        _defaultImageScale = [[value evaluateNumberWithObject:nil context:context] doubleValue];
+        if (_defaultImageScale <= 0.0f)
+        {
+            _defaultImageScale = 1.0f;
+        }
+        return YES;
     }
 
     return NO;
@@ -2871,21 +2882,41 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         return nil;
     }
     
+    BOOL evaluateValueAsColor = NO;
+    if ([result.keyPath rangeOfString:@"color" options:NSCaseInsensitiveSearch].length > 0)
+    {
+        evaluateValueAsColor = YES;
+    }
+    
     NSArray* keys = [parameters allKeys];
     for (NSString* key in keys)
     {
-        UIADPropertyValue* parameter = [parameters objectForKey:key];
-        if ([key isEqualToString:@"from"] && (parameter.type == UIAD_PROPERTY_VALUE_NUMBER || parameter.type == UIAD_PROPERTY_VALUE_ARRAY))
+        if ([key isEqualToString:@"from"] || [key isEqualToString:@"to"] || [key isEqualToString:@"by"])
         {
-            result.fromValue = [parameter evaluateAsNSValueWithObject:self context:context];
-        }
-        else if ([key isEqualToString:@"to"] && (parameter.type == UIAD_PROPERTY_VALUE_NUMBER || parameter.type == UIAD_PROPERTY_VALUE_ARRAY))
-        {
-            result.toValue = [parameter evaluateAsNSValueWithObject:self context:context];
-        }
-        else if ([key isEqualToString:@"by"] && (parameter.type == UIAD_PROPERTY_VALUE_NUMBER || parameter.type == UIAD_PROPERTY_VALUE_ARRAY))
-        {
-            result.byValue = [parameter evaluateAsNSValueWithObject:self context:context];
+            UIADPropertyValue* parameter = [parameters objectForKey:key];
+            id value = evaluateValueAsColor ? [parameter evaluateArrayAsColorWithObject:self context:context] : [parameter evaluateAsNSValueWithObject:self context:context];
+            if (value == nil)
+            {
+                [result release];
+                return nil;
+            }
+            if (evaluateValueAsColor)
+            {
+                value = (id)(((UIColor*)value).CGColor);
+            }
+            
+            if ([key isEqualToString:@"from"])
+            {
+                result.fromValue = value;
+            }
+            else if ([key isEqualToString:@"to"])
+            {
+                result.toValue = value;
+            }
+            else if ([key isEqualToString:@"by"])
+            {
+                result.byValue = value;
+            }
         }
     }
     
@@ -3079,7 +3110,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         if (!_sizeModified)
         {
             // 潜规则，设置对象的image属性后，如果对象的尺寸从未设置过，自动调整到图片的尺寸
-            _entity.frame = CGRectMake(_entity.frame.origin.x, _entity.frame.origin.y, image.size.width, image.size.height);
+            _entity.frame = CGRectMake(_entity.frame.origin.x, _entity.frame.origin.y, image.size.width * _scene.defaultImageScale, image.size.height * _scene.defaultImageScale);
             _sizeModified = YES;
         }
         return YES;
@@ -4876,12 +4907,12 @@ const int UIAD_NUM_OP_PRIORITY[] =
 
 - (UIColor*)evaluateArrayAsColorWithObject:(UIADObject*)object context:(UIADOperationContext*)context
 {
-    if (_type != UIAD_PROPERTY_VALUE_ARRAY || _arrayValue == nil || [_arrayValue count] != 4)
+    if (_type != UIAD_PROPERTY_VALUE_ARRAY || _arrayValue == nil || ([_arrayValue count] != 4 && [_arrayValue count] != 3))
     {
         return nil;
     }
     
-    CGFloat elements[4] = {0.0f};
+    CGFloat elements[4] = {0.0f, 0.0f, 0.0f, 1.0f}; // alpha default 1.0
     for (int i = 0; i < [_arrayValue count]; i ++)
     {
         UIADPropertyValue* pValue = [_arrayValue objectAtIndex:i];
@@ -5062,6 +5093,10 @@ const int UIAD_NUM_OP_PRIORITY[] =
     {
         // 返回0～1间的随机数
         return [NSNumber numberWithDouble:(double)rand() / RAND_MAX];
+    }
+    else if ([macro isEqualToString:@"INT_MAX"])
+    {
+        return [NSNumber numberWithDouble:INT32_MAX];
     }
     else if ([macro isEqualToString:@"CURRENT_TIME"])
     {

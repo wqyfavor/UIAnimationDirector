@@ -1,7 +1,7 @@
 # 模仿微信下雪的动画
 scene(0)
 {
-    resources:"res/resource/"       # 如果资源图片不在main bundle里，需要指定路径
+    resources:"res/resource/SnowFall/"       # 如果资源图片不在main bundle里，需要指定路径
     image:"background.jpg"
     setDefaultFillMode:"forwards"
     setDefaultRemovedOnCompletion:0

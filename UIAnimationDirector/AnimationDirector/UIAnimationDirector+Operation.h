@@ -312,6 +312,7 @@ enum UIAD_RESOURCE_TYPE
     NSString* _defaultTimingFunction;
     BOOL _defaultRemovedOnCompletion;
     CFTimeInterval _defaultDuration;
+    double _defaultImageScale;
 }
 
 @property (nonatomic, readonly) NSString* name;
@@ -324,6 +325,7 @@ enum UIAD_RESOURCE_TYPE
 @property (nonatomic, readonly) NSString* defaultTimingFunction;
 @property (nonatomic, readonly) BOOL defaultRemovedOnCompletion;
 @property (nonatomic, readonly) CFTimeInterval defaultDuration;
+@property (nonatomic, readonly) double defaultImageScale; // 场景内的图片加载后，会设置一次对象的尺寸，使和图片相同，这个是默认的尺寸缩放比例
 
 - (id)initWithAbsoluteTime:(NSTimeInterval)absoluteTime name:(NSString*)name;
 - (UIADObject*)objectWithName:(NSString*)name;

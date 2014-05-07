@@ -1,0 +1,55 @@
+scene(0)
+{
+    resources:"res/resource/Introduction3/"
+    setInfiniteRunloop:1
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    setDefaultTimingFunction:"linear"
+    setDefaultDuration:1
+    setDefaultImageScale:0.5
+    
+    object("sky")
+    {
+        rect:(0, 0, 1r, 1r)
+        animate:(key:"backgroundColor", from:(62 / 255, 81 / 255, 97 / 255), to:(193 / 255, 226 / 255, 236 / 255), manually:"move")
+    }
+    
+    object("title1")
+    {
+        image:"QQGuide_title1"
+        center:(0.5r, 60)
+        animateGroup:(animations:[(key:"transform.translation.y", by:-15), (key:"opacity", to:0)], duration:0.2, manually:"move")
+    }
+    
+    object("title2")
+    {
+        image:"QQGuide_title2"
+        center:(0.5r, 45)
+        alpha:0
+        animateGroup:(animations:[(key:"transform.translation.y", by:15), (key:"opacity", to:1)], duration:0.2, beginTime:0.8, manually:"move")
+        animateGroup:(animations:[(key:"transform.translation.y", by:-15), (key:"opacity", to:0)], duration:0.2, beginTime:1, manually:"move")
+    }
+    
+    object("cloud1")
+    {
+        image:"QQGuide_cloud1"
+        center:(SCREEN_WIDTH / 2, SCREEN_HEIGHT + 120)
+        animate:(key:"transform.rotation", by:-2 * PI, duration:180, repeatCount:INT_MAX)
+    }
+
+    object("earth")
+    {
+        image:"QQGuide_earth"
+        center:(SCREEN_WIDTH / 2, SCREEN_HEIGHT + 120)
+        animate:(key:"transform.rotation", by:-PI, manually:"move")
+        animate:(key:"transform.rotation", by:-PI / 3, beginTime:1, manually:"move")
+        animate:(key:"transform.rotation", by:-PI / 3 + 0.07, beginTime:2, manually:"move")
+    }
+    
+    object("cloud2")
+    {
+        image:"QQGuide_cloud2"
+        center:(SCREEN_WIDTH / 2, SCREEN_HEIGHT + 120)
+        animate:(key:"transform.rotation", by:-2 * PI, duration:60, repeatCount:INT_MAX)
+    }
+}
