@@ -76,7 +76,7 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
                 {
                     parent:object("background")
                     anchor:(0.975, 0.4)
-                    origin:(115, object("chat1").DIMENSION_BOTTOM + 5)
+                    origin:(115, object("chat1").BOTTOM + 5)
                     image:"intro_chat_2.png"
                     animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
                 }
@@ -101,8 +101,8 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
         {
             parent:object("background")
             image:"intro_chat_join_2.png"
-            center:(0.5r, DIMENSION_CENTER_Y)
-            origin:(DIMENSION_X, object("chat2").DIMENSION_BOTTOM + 25)
+            center:(0.5r, CENTER_Y)
+            origin:(X, object("chat2").BOTTOM + 25)
         }
         
         object("joinGroup")                     # 加入讨论组的文字
@@ -163,7 +163,7 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
         {
             parent:object("background")
             anchor:(0.01, 0.46)
-            origin:(13, object("chihuo1").DIMENSION_CENTER_Y)
+            origin:(13, object("chihuo1").CENTER_Y)
             image:"intro_chat_4.png"
             animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
         }
@@ -190,7 +190,7 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
             {
                 parent:object("background")
                 anchor:(0.9684, 0.519)
-                origin:(125, object("chat3").DIMENSION_Y)
+                origin:(125, object("chat3").Y)
                 image:"intro_chat_5.png"
                 animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
             }
@@ -233,7 +233,7 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
                     
                     event(0.6)                  # 三种食物一起飞到锅里
                     {
-                        for(index, [1, 3]):object("food%d", [index]):animateGroup:(duration:0.3, animations:[(key:"position", to:(object("pot").DIMENSION_WIDTH / 2, object("pot").DIMENSION_HEIGHT / 2)), (key:"opacity", from:1, to:0.5)])
+                        for(index, [1, 3]):object("food%d", [index]):animateGroup:(duration:0.3, animations:[(key:"position", to:(object("pot").WIDTH / 2, object("pot").HEIGHT / 2)), (key:"opacity", from:1, to:0.5)])
 
                         event(0.2)              # 0.2秒后锅里出现汤
                         {
@@ -269,7 +269,7 @@ scene(0)     # 第一个场景在0秒时出现，下面的event使用的是相�
                 {
                     parent:object("background")
                     anchor:(0.0286, 0.614)
-                    origin:(20, object("chat4").DIMENSION_Y)
+                    origin:(20, object("chat4").Y)
                     image:"intro_chat_6.png"
                     animate:(key:"transform.scale", duration:0.2, values:[0, 1, 0.9, 1], keyTimes:[0, 0.6, 0.8, 1])
                 }

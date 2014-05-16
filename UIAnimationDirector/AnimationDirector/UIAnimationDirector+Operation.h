@@ -7,6 +7,19 @@
 //
 
 #import <Foundation/Foundation.h>
+
+// 表达式解析使用的，外部可以注册NSBool类型的宏
+@interface NSBool : NSObject
+{
+    BOOL _value;
+}
+
+@property BOOL value;
+
++ (NSBool*)boolWithValue:(BOOL)value;
+- (void)setNot;
+
+@end
  
 #define UIAD_LOG(format, ...)                   NSLog(format, ##__VA_ARGS__)
 //#define UIAD_LOG(format, ...)

@@ -11,7 +11,10 @@ scene(0)
 
     object("slideDot1"):image:"page_control_selected"
     for(index, [2, 5]):object("slideDot%d", [index]):image:"page_control_normal"
-    for(index, [1, 5]):object("slideDot%d", [index]):center:(parent.DIMENSION_WIDTH / 2 - MARGIN * 2 + MARGIN * (index - 1), parent.DIMENSION_HEIGHT / 2)
+    for(index, [1, 5]):object("slideDot%d", [index]):center:(parent.WIDTH / 2 - MARGIN * 2 + MARGIN * (index - 1), parent.HEIGHT / 2)
+    
+    
+    
     for(index, [2, 5]):object("slideDot%d", [index]):animate:(key:"transform.translation.x", by:-MARGIN, beginTime:index - 2, manually:"move")
     for(index, [1, 4]):object("slideDot1"):animate:(key:"transform.translation.x", by:MARGIN, beginTime:index - 1, manually:"move")
 }

@@ -27,7 +27,7 @@ scene(0)    # 0秒时显示场景1
         {
             parent:object("container")
             image:"btn_video.png"
-            center:(object("btn1").DIMENSION_CENTER_X + DIMENSION_WIDTH + 5, object("btn1").DIMENSION_CENTER_Y)     # 脚本支持四则运算，这段代码的意思是把btn2的中心设置为btn1的中心加上自己的尺寸再加上空隙5像素，Y坐标相同；这里使用了访问对象属性的宏，具体有哪些可以看UIAnimationDirector+Operation.m的valueFromMacro方法
+            center:(object("btn1").CENTER_X + WIDTH + 5, object("btn1").CENTER_Y)     # 脚本支持四则运算，这段代码的意思是把btn2的中心设置为btn1的中心加上自己的尺寸再加上空隙5像素，Y坐标相同；这里使用了访问对象属性的宏，具体有哪些可以看UIAnimationDirector+Operation.m的valueFromMacro方法
             animate:(key:"opacity", duration:0.2, from:0, to:1)     # 对这个按钮做一个渐入动画
         }
         
@@ -39,7 +39,7 @@ scene(0)    # 0秒时显示场景1
             {
                 parent:object("container")
                 image:"btn_video.png"
-                animateGroup:(duration:0.5, animations:[(key:"transform.scale", from:0, to:1), (key:"opacity", from:0, to:1), (key:"transform.translation", to:(object("btn2").DIMENSION_X + DIMENSION_WIDTH + 5, object("btn2").DIMENSION_Y))])          # 对这个物体执行一个动画组，分别是尺寸比率从0到1，透明度从0到1，坐标从当前位置移动到btn2右边。最后一个动画的to参数需要CGPoint类型，所以需要把两个数值放到数组里，用小括号括起来
+                animateGroup:(duration:0.5, animations:[(key:"transform.scale", from:0, to:1), (key:"opacity", from:0, to:1), (key:"transform.translation", to:(object("btn2").X + WIDTH + 5, object("btn2").Y))])          # 对这个物体执行一个动画组，分别是尺寸比率从0到1，透明度从0到1，坐标从当前位置移动到btn2右边。最后一个动画的to参数需要CGPoint类型，所以需要把两个数值放到数组里，用小括号括起来
             }
             
             event(1)                        # 又过了一秒，再显示一个btn，这个btn执行一个关键帧动画
@@ -49,7 +49,7 @@ scene(0)    # 0秒时显示场景1
                     parent:object("container")
                     image:"btn_video.png"
                     anchor:(0, 1)           # 设置动画的锚点为左下角
-                    origin:(object("btn2").DIMENSION_X + DIMENSION_WIDTH * 2 + 10, object("btn2").DIMENSION_Y)
+                    origin:(object("btn2").X + WIDTH * 2 + 10, object("btn2").Y)
                     animate:(key:"transform.scale", duration:0.8, values:(0, 1, 1.4, 1))        # 执行关键帧动画，实现伸缩的效果
                 }
                 
@@ -59,7 +59,7 @@ scene(0)    # 0秒时显示场景1
                     {
                         parent:object("btn4")       # 把btn5放在btn4里面
                         image:"btn_video.png"
-                        animate:(key:"transform.translation.x", duration:1, to:DIMENSION_WIDTH + 5, stopEvent:"fadeout")        # 当btn5的动画结束时，执行事件"fadeout"
+                        animate:(key:"transform.translation.x", duration:1, to:WIDTH + 5, stopEvent:"fadeout")        # 当btn5的动画结束时，执行事件"fadeout"
                     }
                 }
             }

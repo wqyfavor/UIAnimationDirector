@@ -64,7 +64,7 @@ scene(0)
         event(1)
         {
             event:("rotateObject", [localObject("obj")])
-            if(count < 3):event:("createObject", [left + localObject("obj").DIMENSION_WIDTH + 5, top + localObject("obj").DIMENSION_HEIGHT + 5, count + 1])  # 在右下角创建同样的物体并执行动画，最多创建三个
+            if(count < 3):event:("createObject", [left + localObject("obj").WIDTH + 5, top + localObject("obj").HEIGHT + 5, count + 1])  # 在右下角创建同样的物体并执行动画，最多创建三个
         }
     }
     

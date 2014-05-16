@@ -37,13 +37,13 @@ scene(0)
     object("followAccount")
     {
         image:"guide_tmall_startup.png"
-        center:(SCREEN_WIDTH + SCREEN_WIDTH / 2 + 1.5, SCENE_HEIGHT - 15 - DIMENSION_HEIGHT / 2)
+        center:(SCREEN_WIDTH + SCREEN_WIDTH / 2 + 1.5, SCENE_HEIGHT - 15 - HEIGHT / 2)
         animate:(key:"opacity", to:0.0)
     }
 
     object("intro", "guide_tmall_bg_2.png"):center:(160, 280)
-    object("tmall_icon", "guide_tmall_bg_cat.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - DIMENSION_WIDTH) / 2, 95)
-    object("tmall_intro_page_2", "guide_tmall_bg_intro.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - DIMENSION_WIDTH) / 2, object("tmall_icon").DIMENSION_BOTTOM + 25)
+    object("tmall_icon", "guide_tmall_bg_cat.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - WIDTH) / 2, 95)
+    object("tmall_intro_page_2", "guide_tmall_bg_intro.png"):origin:(SCREEN_WIDTH + (SCREEN_WIDTH - WIDTH) / 2, object("tmall_icon").BOTTOM + 25)
     
     event("switchedView")
     {
@@ -77,7 +77,7 @@ scene(0)
     
     event("flashLines")
     {
-        event:("createLine", [1, object("followAccount").DIMENSION_BOTTOM - 33])
+        event:("createLine", [1, object("followAccount").BOTTOM - 33])
         object("followAccount"):animate:(key:"opacity", to:1.0)
     }
     

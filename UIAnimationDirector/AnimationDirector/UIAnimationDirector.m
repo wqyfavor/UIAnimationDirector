@@ -131,6 +131,7 @@
     NSTimeInterval start = mach_absolute_time() * timebase_ratio;
     
     srandom(time(0));
+    srand(time(0));
     
     [self performSelectorOnMainThread:@selector(didTimerEventStart:) withObject:[NSArray arrayWithObjects:[NSNumber numberWithDouble:start], [NSNumber numberWithDouble:timebase_ratio], nil] waitUntilDone:NO];
     

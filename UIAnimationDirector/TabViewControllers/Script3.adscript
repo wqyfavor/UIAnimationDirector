@@ -11,7 +11,7 @@ scene(0)
     
     event("runLoop")
     {
-        # 雪花的呼吸加旋转动画，函数是可以嵌套着写的，无所谓            
+        # 雪花的呼吸加旋转动画，函数是可以嵌套着写的，无所谓
         event("startBreath", ["snow", "minScale"])
         {
             object(snow):animate:(key:"transform.scale", from:minScale, to:minScale + 0.3, duration:6, timingFunction:"linear", repeatCount:100, autoreverses:1)
@@ -41,7 +41,7 @@ scene(0)
             animateGroup:(duration:4, animations:[(key:"opacity", from:0, to:1), (key:"transform.scale", to:minScale)], stopEvent:("startBreath", [localObject("snow"), minScale]))  # 当雪花渐出后，开始进行放大缩小的呼吸动画
 
             # 雪花下降的动画
-            animate:(key:"transform.translation", duration:SNOW_FALL_TIME + (RANDOM * 2 - 1) * 10, by:((RANDOM * 2 - 1) * 20, parent.DIMENSION_HEIGHT - DIMENSION_Y), timingFunction:"linear", stopEvent:("removeSnow", [localObject("snow")]))
+            animate:(key:"transform.translation", duration:SNOW_FALL_TIME + (RANDOM * 2 - 1) * 10, by:((RANDOM * 2 - 1) * 20, parent.HEIGHT - Y), timingFunction:"linear", stopEvent:("removeSnow", [localObject("snow")]))
         }
 
         event("removeSnow", ["snow"])

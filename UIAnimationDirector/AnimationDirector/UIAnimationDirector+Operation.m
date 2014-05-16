@@ -60,19 +60,6 @@ void clearLastError(UIADOperationContext* context)
 
 #pragma mark -
 
-// 表达式解析使用的
-@interface NSBool : NSObject
-{
-    BOOL _value;
-}
-
-@property BOOL value;
-
-+ (NSBool*)boolWithValue:(BOOL)value;
-- (void)setNot;
-
-@end
-
 @class UIADAnimationDelegate;
 
 @interface UIADProgram(PRIVATE)
@@ -2412,7 +2399,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 - (BOOL)isValidPropertyName:(NSString*)str
 {
-    return [str isEqualToString:@"image"] || [str isEqualToString:@"animate"] || [str isEqualToString:@"animateGroup"] || [str isEqualToString:@"anchor"] || [str isEqualToString:@"center"] ||
+    return [str isEqualToString:@"image"] || [str isEqualToString:@"animate"] || [str isEqualToString:@"animateGroup"] || [str isEqualToString:@"anchor"] || [str isEqualToString:@"anchorZ"] || [str isEqualToString:@"center"] ||
     [str isEqualToString:@"rect"] || [str isEqualToString:@"origin"] || [str isEqualToString:@"size"] || [str isEqualToString:@"hide"] || [str isEqualToString:@"show"] || [str isEqualToString:@"alpha"] ||
     [str isEqualToString:@"backgroundColor"] || [str isEqualToString:@"parent"] || [str isEqualToString:@"bringToFront"] || [str isEqualToString:@"sendToBack"] || [str isEqualToString:@"flash"] ||
     [str isEqualToString:@"tapEvent"] || [str isEqualToString:@"free"] || [str isEqualToString:@"transit"] || [str isEqualToString:@"marqueeText"] || [str isEqualToString:@"setDefaultMarqueeTextDuration"] ||
@@ -2425,6 +2412,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     ([name isEqualToString:@"animate"] && value.type == UIAD_PROPERTY_VALUE_DICTIONARY) ||
     ([name isEqualToString:@"animateGroup"] && value.type == UIAD_PROPERTY_VALUE_DICTIONARY) ||
     ([name isEqualToString:@"anchor"] && value.type == UIAD_PROPERTY_VALUE_ARRAY) ||
+    ([name isEqualToString:@"anchorZ"] && value.type == UIAD_PROPERTY_VALUE_NUMBER) ||
     ([name isEqualToString:@"center"] && value.type == UIAD_PROPERTY_VALUE_ARRAY) ||
     ([name isEqualToString:@"rect"] && value.type == UIAD_PROPERTY_VALUE_ARRAY) ||
     ([name isEqualToString:@"origin"] && value.type == UIAD_PROPERTY_VALUE_ARRAY) ||
@@ -3213,7 +3201,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         NSNumber* alpha = [value evaluateNumberWithObject:self context:context];
         if (alpha)
         {
-            _entity.alpha = (float)[alpha doubleValue];
+            _entity.alpha = (CGFloat)[alpha doubleValue];
             return YES;
         }
     }
@@ -3285,6 +3273,15 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
                 _entity.layer.anchorPoint = CGPointMake((CGFloat)[x doubleValue], (CGFloat)[y doubleValue]);
                 return YES;
             }
+        }
+    }
+    else if ([name isEqualToString:@"anchorZ"])
+    {
+        NSNumber* zValue = [value evaluateNumberWithObject:self context:context];
+        if (zValue)
+        {
+            _entity.layer.anchorPointZ = (CGFloat)[zValue doubleValue];
+            return YES;
         }
     }
     else if ([name isEqualToString:@"animate"])
@@ -4721,15 +4718,15 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     {
                         NSString* macroStr = [_stringValue substringWithRange:NSMakeRange(initial, i - initial)];
                         id value = [UIADPropertyValue valueFromIdentifier:macroStr object:currentObject context:context];
-                        if (value == nil || ![value isKindOfClass:[NSNumber class]])
-                        {
-                            return nil;
-                        }
-                        else
+                        if (value && ([value isKindOfClass:[NSNumber class]] || [value isKindOfClass:[NSBool class]]))
                         {
                             [operands push:value];
                             i --; // 后面还要再加一次
                             break;
+                        }
+                        else
+                        {
+                            return nil;
                         }
                     }
                 }
@@ -5039,27 +5036,27 @@ const int UIAD_NUM_OP_PRIORITY[] =
         entity = (UIADEntity*)object;
     }
     
-    if ([macro isEqualToString:@"DIMENSION_WIDTH"])
+    if ([macro isEqualToString:@"WIDTH"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.size.width];
     }
-    else if ([macro isEqualToString:@"DIMENSION_HEIGHT"])
+    else if ([macro isEqualToString:@"HEIGHT"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.size.height];
     }
-    else if ([macro isEqualToString:@"DIMENSION_X"])
+    else if ([macro isEqualToString:@"X"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.origin.x];
     }
-    else if ([macro isEqualToString:@"DIMENSION_Y"])
+    else if ([macro isEqualToString:@"Y"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.origin.y];
     }
-    else if ([macro isEqualToString:@"DIMENSION_CENTER_X"])
+    else if ([macro isEqualToString:@"CENTER_X"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.center.x];
     }
-    else if ([macro isEqualToString:@"DIMENSION_CENTER_Y"])
+    else if ([macro isEqualToString:@"CENTER_Y"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.center.y];
     }
@@ -5077,11 +5074,11 @@ const int UIAD_NUM_OP_PRIORITY[] =
             return [NSNumber numberWithFloat:((UIADImageEntity*)entity).image.size.height];
         }
     }
-    else if ([macro isEqualToString:@"DIMENSION_BOTTOM"])
+    else if ([macro isEqualToString:@"BOTTOM"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.origin.y + entity.frame.size.height];
     }
-    else if ([macro isEqualToString:@"DIMENSION_RIGHT"])
+    else if ([macro isEqualToString:@"RIGHT"])
     {
         return entity == nil ? nil : [NSNumber numberWithFloat:entity.frame.origin.x + entity.frame.size.width];
     }
