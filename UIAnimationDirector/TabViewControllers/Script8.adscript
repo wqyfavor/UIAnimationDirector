@@ -1,0 +1,11 @@
+scene(0)
+{
+    resources:"res/resource/Movie/"       # 如果资源图片不在main bundle里，需要指定路径
+    setDefaultFillMode:"forwards"
+    setDefaultImageScale:0.5
+    
+    object("cat")
+    {
+        movie:(images:["app－001000%d.jpg", [1, 5]], interval:0.1, repeat:0, autoreverse:1)
+    }
+}

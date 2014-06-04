@@ -24,7 +24,7 @@
 #define UIAD_LOG(format, ...)                   NSLog(format, ##__VA_ARGS__)
 //#define UIAD_LOG(format, ...)
 
-#define UIAD_TIME_LINE_PRECISION        0.01
+#define UIAD_TIME_LINE_PRECISION        0.001
 #define UIAD_NO_PRECONDITION            -1
 #define UIAD_FINISH_BUFFER_TIME         3       // 动画的operation都执行过了，但是需要再有一个缓冲时间才真正认为整个动画结束
 #define UIAD_MARQUEE_TEXT_DURATION      0.3     // 滚动文本默认动画时间
@@ -116,9 +116,11 @@ enum UIAD_PROGRAM_STATUS
 {
     BOOL _infiniteRunloop;                  // 在UIAnimationDirector的线程循环里，是否执行完所有timeLine后自动退出
     int _current;
+    int _activeDurativeTimeLine;
     int _status;
     NSTimeInterval _finishBufferTime;       // 结束缓冲的起始时间
     NSMutableArray* _timeLines;             // 脚本代码解析出的时间确定的时间线
+    NSMutableArray* _durativeTimeLines;     // 在一个时间段里都要触发的时间线
     NSMutableDictionary* _functionEvents;   // 脚本里的函数event事件
     NSMutableDictionary* _localVariables;   // 数值变量
     NSMutableArray* _booleanEvaluators;     // boolean域
@@ -141,6 +143,7 @@ enum UIAD_PROGRAM_STATUS
 @property (nonatomic, assign) int status;
 @property (nonatomic, assign) BOOL infiniteRunloop;
 @property (nonatomic, readonly) NSMutableArray* timeLines;
+@property (nonatomic, readonly) NSMutableArray* durativeTimeLines;
 @property (nonatomic, readonly) NSMutableDictionary* functionEvents;
 @property (nonatomic, readonly) NSMutableDictionary* localVariables;
 @property (nonatomic, readonly) NSMutableArray* booleanEvaluators;
@@ -153,6 +156,7 @@ enum UIAD_PROGRAM_STATUS
 
 - (void)addScene:(UIADScene*)scene;
 - (UIADTimeLine*)getTimeLine:(NSTimeInterval)time;
+- (UIADTimeLine*)getDurativeTimeLine:(NSTimeInterval)time duration:(NSTimeInterval)duration;
 - (void)sort;
 - (void)reset;
 - (BOOL)finished:(NSTimeInterval)now;
@@ -194,18 +198,27 @@ enum UIAD_OPERATION_TYPE
 
 @interface UIADTimeLine : NSObject
 {
+    BOOL _inactive;
+    BOOL _runtime;
     NSTimeInterval _time;
+    NSTimeInterval _duration;
+    NSTimeInterval _localTime;
     
     NSMutableArray* _operations;
     UIADFunctionEvent* _functionEvent;
 }
 
+@property (nonatomic, assign) BOOL inactive;
+@property (nonatomic, readonly) BOOL runtime;
 @property (nonatomic, readonly) NSTimeInterval time;
+@property (nonatomic, assign) NSTimeInterval duration;
+@property (nonatomic, assign) NSTimeInterval localTime;
 @property (nonatomic, readonly) NSMutableArray* operations;
 @property (nonatomic, assign) UIADFunctionEvent* functionEvent;
 
 - (id)initWithTime:(NSTimeInterval)time;
 - (id)initWithTime:(NSTimeInterval)time capacity:(int)capacity;
+- (id)initWithTime:(NSTimeInterval)time duration:(NSTimeInterval)duration runtime:(BOOL)runtime;
 
 - (UIADOperation*)addOperation:(int)type parameters:(NSDictionary*)parameters line:(int)line runtime:(BOOL)runtime precondition:(int)precondition;
 - (void)reset;
@@ -386,8 +399,10 @@ enum UIAD_FUNCTION_EVENT_ARGUMENT
     
     int _status;
     int _current;
+    int _activeDurativeTimeLine;
     NSString* _name;                // 拥有名字的event，类似一个函数，编译时无法确定执行时间
     NSMutableArray* _timeLines;
+    NSMutableArray* _durativeTimeLines; // 带时间跨度的time line，比如movie动作钥触发的
     
     NSDictionary* _argumentIndex;   // 记录某个参数名是第几个参数
     NSArray* _runtimeArguments;     // 运行时真正参数，从UIAD_PROPERTY_VALUE_ARRAY类型的UIADPropertyValue里获得
@@ -405,6 +420,7 @@ enum UIAD_FUNCTION_EVENT_ARGUMENT
 @property (nonatomic, readonly) int current;
 @property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) NSMutableArray* timeLines;
+@property (nonatomic, readonly) NSMutableArray* durativeTimeLines;
 @property (nonatomic, retain) NSDictionary* argumentIndex;
 @property (nonatomic, retain) NSArray* runtimeArguments;
 @property (nonatomic, retain) NSMutableArray* variableTimeEvents;
@@ -420,6 +436,7 @@ enum UIAD_FUNCTION_EVENT_ARGUMENT
 - (id)initAsVariableTimeEvent:(NSString*)expression superEvent:(UIADFunctionEvent*)superEvent sourceLine:(int)sourceLine;
 
 - (UIADTimeLine*)getTimeLine:(NSTimeInterval)time;
+- (UIADTimeLine*)getDurativeTimeLine:(NSTimeInterval)time duration:(NSTimeInterval)duration;
 - (UIADFunctionEvent*)duplicateEvent;
 
 - (BOOL)hasArgument:(NSString*)arg;

@@ -321,6 +321,7 @@ void clearLastError(UIADOperationContext* context)
 @synthesize status = _status;
 @synthesize infiniteRunloop = _infiniteRunloop;
 @synthesize timeLines = _timeLines;
+@synthesize durativeTimeLines = _durativeTimeLines;
 @synthesize functionEvents = _functionEvents;
 @synthesize localVariables = _localVariables;
 @synthesize booleanEvaluators = _booleanEvaluators;
@@ -336,6 +337,7 @@ void clearLastError(UIADOperationContext* context)
     if (self = [super init])
     {
         _timeLines = [[NSMutableArray alloc] initWithCapacity:50];
+        _durativeTimeLines = [[NSMutableArray alloc] initWithCapacity:10];
         _functionEvents = [[NSMutableDictionary alloc] initWithCapacity:10];
         _localVariables = [[NSMutableDictionary alloc] initWithCapacity:20];
         _booleanEvaluators = [[NSMutableArray alloc] initWithCapacity:10];
@@ -356,6 +358,7 @@ void clearLastError(UIADOperationContext* context)
 - (void)dealloc
 {
     [_timeLines release];
+    [_durativeTimeLines release];
     [_functionEvents release];
     [_localVariables release];
     [_booleanEvaluators release];
@@ -416,6 +419,14 @@ void clearLastError(UIADOperationContext* context)
     return [newTimeLine autorelease];
 }
 
+- (UIADTimeLine*)getDurativeTimeLine:(NSTimeInterval)time duration:(NSTimeInterval)duration
+{
+    UIADTimeLine* newTimeLine = [[UIADTimeLine alloc] initWithTime:time duration:duration runtime:YES];
+    [_durativeTimeLines addObject:newTimeLine];
+    _activeDurativeTimeLine ++;
+    return [newTimeLine autorelease];
+}
+
 NSInteger compareTimeLine(id t1, id t2, void* context)
 {
     UIADTimeLine* timeLine1 = (UIADTimeLine*)t1;
@@ -444,6 +455,22 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     {
         [timeLine reset];
     }
+    
+    // 把运行时生成的durative time line移除。比如object的movie方法会生成运行时的time line
+    for (int i = [_durativeTimeLines count] - 1; i >= 0; i --)
+    {
+        UIADTimeLine* timeLine = [_durativeTimeLines objectAtIndex:i];
+        if (timeLine.runtime)
+        {
+            // 这个time line是运行时产生的，将其remove掉
+            [_durativeTimeLines removeObjectAtIndex:i];
+        }
+    }
+    for (UIADTimeLine* timeLine in _durativeTimeLines)
+    {
+        [timeLine reset];
+    }
+    _activeDurativeTimeLine = [_durativeTimeLines count];
     
     // 如果某个timeLine里的operations为空了，将其移除，产生空timeline的原因是运行时添加了事件，上面对每个timeLine进行reset把这些事件移除了
     for (int i = [_timeLines count] - 1; i >= 0; i --)
@@ -480,7 +507,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 - (BOOL)finished:(NSTimeInterval)now
 {
-    BOOL finished = !_infiniteRunloop && (_current >= [_timeLines count] && [_eventPipelines count] == 0) && [_animationDelegates count] == 0;
+    BOOL finished = !_infiniteRunloop && (_current >= [_timeLines count] && [_eventPipelines count] == 0) && (_activeDurativeTimeLine == 0) && ([_animationDelegates count] == 0);
     if (finished)
     {
         if (_status == UIAD_PROGRAM_STATUS_RUNNING)
@@ -651,8 +678,25 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
             break;
         }
     }
-    
     _current += [executableLines count];
+    
+    // durative time lines
+    for (UIADTimeLine* line in _durativeTimeLines)
+    {
+        if (!line.inactive && (line.time <= time))
+        {
+            if (line.time + line.duration >= time)
+            {
+                line.localTime = time - line.time;
+                [executableLines addObject:line];
+            }
+            else
+            {
+                _activeDurativeTimeLine --;
+                line.inactive = YES;
+            }
+        }
+    }
     
     // 搜pipelines
     if ([_eventPipelines count] > 0)
@@ -920,7 +964,11 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 @implementation UIADTimeLine
 
+@synthesize inactive = _inactive;
+@synthesize runtime = _runtime;
 @synthesize time = _time;
+@synthesize duration = _duration;
+@synthesize localTime = _localTime;
 @synthesize operations = _operations;
 @synthesize functionEvent = _functionEvent;
 
@@ -946,6 +994,18 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     return self;
 }
 
+- (id)initWithTime:(NSTimeInterval)time duration:(NSTimeInterval)duration runtime:(BOOL)runtime
+{
+    if (self = [super init])
+    {
+        _time = time;
+        _duration = duration;
+        _runtime = runtime;
+        _operations = [[NSMutableArray alloc] initWithCapacity:5];
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     for (UIADOperation* op in _operations)
@@ -966,6 +1026,8 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 - (void)reset
 {
+    _inactive = NO;
+    _localTime = 0.0f;
     for (int i = [_operations count] - 1; i >= 0; i --)
     {
         UIADOperation* operation = [_operations objectAtIndex:i];
@@ -981,6 +1043,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 {
     UIADTimeLine* result = [[UIADTimeLine alloc] initWithTime:_time capacity:[_operations count]];
     result.functionEvent = _functionEvent;
+    result.duration = _duration;
     for (UIADOperation* op in _operations)
     {
         UIADOperation* dupOp = [op duplicateOperation];
@@ -1182,6 +1245,13 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 {
     [_image release];
     [super dealloc];
+}
+
+- (void)setImage:(UIImage *)image
+{
+    [_image release];
+    _image = [image retain];
+    [self setNeedsDisplay];
 }
 
 - (void)drawRect:(CGRect)rect
@@ -1703,6 +1773,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 @synthesize current = _current;
 @synthesize name = _name;
 @synthesize timeLines = _timeLines;
+@synthesize durativeTimeLines = _durativeTimeLines;
 @synthesize argumentIndex = _argumentIndex;
 @synthesize runtimeArguments = _runtimeArguments;
 @synthesize variableTimeEvents = _variableTimeEvents;
@@ -1757,6 +1828,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         
         _name = [name retain];
         _timeLines = [[NSMutableArray alloc] initWithCapacity:20];
+        _durativeTimeLines = [[NSMutableArray alloc] initWithCapacity:10];
         
         _localObjects = [[NSMutableDictionary alloc] initWithCapacity:10];
         _localVariables = [[NSMutableDictionary alloc] initWithCapacity:10];
@@ -1802,6 +1874,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 {
     [_name release];
     [_timeLines release];
+    [_durativeTimeLines release];
     [_argumentIndex release];
     [_runtimeArguments release];
     [_variableTimeEvents release];
@@ -1851,6 +1924,14 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     return [newTimeLine autorelease];
 }
 
+- (UIADTimeLine*)getDurativeTimeLine:(NSTimeInterval)time duration:(NSTimeInterval)duration
+{
+    UIADTimeLine* newTimeLine = [[UIADTimeLine alloc] initWithTime:time duration:duration runtime:YES];
+    [_durativeTimeLines addObject:newTimeLine];
+    _activeDurativeTimeLine ++;
+    return [newTimeLine autorelease];
+}
+
 - (UIADFunctionEvent*)duplicateEvent
 {
     UIADFunctionEvent* result = [[UIADFunctionEvent alloc] initWithName:_name];
@@ -1862,6 +1943,15 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         UIADTimeLine* dupLine = [sourceLine duplicateTimeLine];
         dupLine.functionEvent = result;
         [result.timeLines addObject:dupLine];
+    }
+    for (UIADTimeLine* sourceLine in _durativeTimeLines)
+    {
+        if (!sourceLine.runtime)
+        {
+            UIADTimeLine* dupLine = [sourceLine duplicateTimeLine];
+            dupLine.functionEvent = result;
+            [result.durativeTimeLines addObject:dupLine];
+        }
     }
     for (UIADBooleanEvaluator* evaluator in _booleanEvaluators)
     {
@@ -1893,7 +1983,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 - (BOOL)finished:(NSTimeInterval)now
 {
-    BOOL finished = _current >= [_timeLines count];
+    BOOL finished = (_current >= [_timeLines count]) && (_activeDurativeTimeLine == 0);
     if (finished)
     {
         if (_status == UIAD_FUNCTION_EVENT_STARTED)
@@ -1920,6 +2010,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 {
     _status = UIAD_FUNCTION_EVENT_STARTED;
     _startTime = time;
+    _activeDurativeTimeLine = [_durativeTimeLines count];
 }
 
 - (NSArray*)getExecutableLines:(NSTimeInterval)time
@@ -1939,8 +2030,25 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
             break;
         }
     }
-    
     _current += [executableLines count];
+    
+    // durative time lines
+    for (UIADTimeLine* line in _durativeTimeLines)
+    {
+        if (!line.inactive && (line.time <= time))
+        {
+            if (line.time + line.duration >= time)
+            {
+                line.localTime = time - line.time;
+                [executableLines addObject:line];
+            }
+            else
+            {
+                _activeDurativeTimeLine --;
+                line.inactive = YES;
+            }
+        }
+    }
     
     return [executableLines autorelease];
 }
@@ -2399,7 +2507,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 
 - (BOOL)isValidPropertyName:(NSString*)str
 {
-    return [str isEqualToString:@"image"] || [str isEqualToString:@"animate"] || [str isEqualToString:@"animateGroup"] || [str isEqualToString:@"anchor"] || [str isEqualToString:@"anchorZ"] || [str isEqualToString:@"center"] ||
+    return [str isEqualToString:@"image"] || [str isEqualToString:@"movie"] || [str isEqualToString:@"animate"] || [str isEqualToString:@"animateGroup"] || [str isEqualToString:@"anchor"] || [str isEqualToString:@"anchorZ"] || [str isEqualToString:@"center"] ||
     [str isEqualToString:@"rect"] || [str isEqualToString:@"origin"] || [str isEqualToString:@"size"] || [str isEqualToString:@"hide"] || [str isEqualToString:@"show"] || [str isEqualToString:@"alpha"] ||
     [str isEqualToString:@"backgroundColor"] || [str isEqualToString:@"parent"] || [str isEqualToString:@"bringToFront"] || [str isEqualToString:@"sendToBack"] || [str isEqualToString:@"flash"] ||
     [str isEqualToString:@"tapEvent"] || [str isEqualToString:@"free"] || [str isEqualToString:@"transit"] || [str isEqualToString:@"marqueeText"] || [str isEqualToString:@"setDefaultMarqueeTextDuration"] ||
@@ -2409,6 +2517,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 - (BOOL)isValidPropertyValueForProperty:(NSString*)name value:(UIADPropertyValue*)value
 {
     return ([name isEqualToString:@"image"] && (value.type == UIAD_PROPERTY_VALUE_STRING || value.type == UIAD_PROPERTY_VALUE_ARRAY || value.type == UIAD_PROPERTY_VALUE_DICTIONARY)) ||
+    ([name isEqualToString:@"movie"] && value.type == UIAD_PROPERTY_VALUE_DICTIONARY) ||
     ([name isEqualToString:@"animate"] && value.type == UIAD_PROPERTY_VALUE_DICTIONARY) ||
     ([name isEqualToString:@"animateGroup"] && value.type == UIAD_PROPERTY_VALUE_DICTIONARY) ||
     ([name isEqualToString:@"anchor"] && value.type == UIAD_PROPERTY_VALUE_ARRAY) ||
@@ -3149,6 +3258,145 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
             {
                 return [self loadImage:imageName context:context stretch:stretch capX:stretchCapX capY:stretchCapY];
             }
+        }
+    }
+    else if ([name isEqualToString:@"movie"])
+    {
+        // movie:(images:["a", "b"], interval:0.01, repeat:1, autoreverse:0)
+        // movie:(images:["a%d", [0, 10]], interval:0.01, repeat:1, autoreverse:1)
+        UIADPropertyValue* pInterval = [value.dictionaryValue objectForKey:@"interval"];
+        UIADPropertyValue* pRepeat = [value.dictionaryValue objectForKey:@"repeat"];
+        UIADPropertyValue* pAutoreverse = [value.dictionaryValue objectForKey:@"autoreverse"];
+        if (pInterval == nil)
+            pInterval = [UIADPropertyValue valueAsNumber:[NSNumber numberWithDouble:0.1]];
+        if (pRepeat == nil)
+            pRepeat = [UIADPropertyValue valueAsNumber:[NSNumber numberWithDouble:1.0]];
+        if (pAutoreverse == nil)
+            pAutoreverse = [UIADPropertyValue valueAsNumber:[NSNumber numberWithDouble:0.0]];
+        
+        NSNumber* interval = [pInterval evaluateNumberWithObject:self context:context];
+        NSNumber* repeat = [pRepeat evaluateNumberWithObject:self context:context];
+        NSNumber* autoreverse = [pAutoreverse evaluateNumberWithObject:self context:context];
+        
+        if ((interval == nil) || [interval doubleValue] <= 0.0f || (repeat == nil) || autoreverse == nil)
+            return NO;
+        
+        BOOL bAutoreverse = [autoreverse doubleValue] == 1.0;
+        
+        UIADPropertyValue* images = [value.dictionaryValue objectForKey:@"images"];
+        if (images && images.type == UIAD_PROPERTY_VALUE_ARRAY)
+        {
+            // 先计算图片的数目
+            BOOL imageValid = NO;
+            int imageCount = 0;
+            NSMutableDictionary* movieParameters = [NSMutableDictionary dictionaryWithObjectsAndKeys:interval, @"interval", repeat, @"repeat", [NSNumber numberWithBool:bAutoreverse], @"autoreverse", nil];
+            if ([images.arrayValue count] == 2 && ((UIADPropertyValue*)[images.arrayValue objectAtIndex:1]).type == UIAD_PROPERTY_VALUE_ARRAY)
+            {
+                // images:["a%d", [0, 10]]
+                UIADPropertyValue* format = (UIADPropertyValue*)[images.arrayValue firstObject];
+                UIADPropertyValue* rangeArray = (UIADPropertyValue*)[images.arrayValue objectAtIndex:1];
+                if (format.type == UIAD_PROPERTY_VALUE_STRING && [rangeArray.arrayValue count] == 2)
+                {
+                    UIADPropertyValue* fromValue = [rangeArray.arrayValue firstObject];
+                    UIADPropertyValue* toValue = [rangeArray.arrayValue objectAtIndex:1];
+                    NSNumber* from = [fromValue evaluateNumberWithObject:self context:context];
+                    NSNumber* to = [toValue evaluateNumberWithObject:self context:context];
+                    if (from && to && ([from integerValue] <= [to integerValue]))
+                    {
+                        imageValid = YES;
+                        imageCount = [to integerValue] - [from integerValue] + 1;
+                        [movieParameters setObject:format.stringValue forKey:@"format"];
+                        [movieParameters setObject:from forKey:@"from"];
+                        [movieParameters setObject:to forKey:@"to"];
+                    }
+                }
+            }
+            else
+            {
+                // images:["a", "b"]
+                NSMutableArray* imageNames = [NSMutableArray arrayWithCapacity:[images.arrayValue count]];
+                for (UIADPropertyValue* imageValue in images.arrayValue)
+                {
+                    if (imageValue.type == UIAD_PROPERTY_VALUE_STRING)
+                    {
+                        [imageNames addObject:imageValue.stringValue];
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                imageValid = [imageNames count] == [images.arrayValue count];
+                if (imageValid)
+                {
+                    imageCount = [imageNames count];
+                    [movieParameters setObject:imageNames forKey:@"images"];
+                }
+            }
+            
+            if (imageValid && imageCount > 0)
+            {
+                [movieParameters setObject:[NSNumber numberWithInt:imageCount] forKey:@"imageCount"];
+                
+                // 创建一个durativeTimeLine，并向其中加入_movie操作
+                NSTimeInterval duration = ([repeat doubleValue] == 0.0f) ? INFINITY : (bAutoreverse ? ((imageCount - 1) * [repeat doubleValue] * [interval doubleValue]) : ((imageCount * [repeat doubleValue] - 1) * [interval doubleValue]));
+                NSTimeInterval now = context.operation.timeLine.time;
+                UIADTimeLine* timeLine = context.functionEvent ? [context.functionEvent getDurativeTimeLine:now duration:duration] : [context.program getDurativeTimeLine:now duration:duration];
+                UIADPropertyValue* propertyParameters = [UIADPropertyValue valueAsDictionary:movieParameters];
+                [timeLine addOperation:UIAD_OPERATION_ASSIGN parameters:[NSDictionary dictionaryWithObjectsAndKeys:self, @"object", @"_movie", @"name", propertyParameters, @"value", nil] line:context.operation.line runtime:YES precondition:context.operation.precondition];
+                return [self setPropertyValue:@"_movie" value:propertyParameters context:context]; // 执行第一帧
+            }
+        }
+    }
+    else if ([name isEqualToString:@"_movie"])
+    {
+        // 这个方法不对外公开，是movie方法生成的操作，执行具体的轮播图片效果
+        // 重点是计算当前时刻，需要显示哪张图片
+        NSTimeInterval movieLocalTime = context.operation.timeLine.localTime;
+        NSDictionary* parameters = value.dictionaryValue;
+        BOOL autoreverse = [[parameters objectForKey:@"autoreverse"] boolValue];
+        int imageCount = [[parameters objectForKey:@"imageCount"] intValue];
+        int step = (int)(movieLocalTime / [[parameters objectForKey:@"interval"] doubleValue]);
+        
+        int imageIndex = 0;
+        if (imageCount > 1)
+        {
+            if (autoreverse)
+            {
+                int cycle = (imageCount - 1) * 2;
+                int phase = step % cycle;
+                imageIndex = (phase <= cycle / 2) ? phase : cycle - phase;
+            }
+            else
+            {
+                imageIndex = step % imageCount;
+            }
+        }
+        
+        NSString* imageName = nil;
+        NSString* format = [parameters objectForKey:@"format"];
+        if (format)
+        {
+            NSNumber* from = [parameters objectForKey:@"from"];
+            NSNumber* to = [parameters objectForKey:@"to"];
+            imageIndex += [from integerValue];
+            if (imageIndex <= [to integerValue])
+            {
+                imageName = [UIADPropertyValue evaluateFormat:format withArguments:[UIADPropertyValue valueAsArray:[NSArray arrayWithObject:[UIADPropertyValue valueAsNumber:[NSNumber numberWithInt:imageIndex]]]] object:self context:context];
+            }
+        }
+        else
+        {
+            NSArray* imageNames = [parameters objectForKey:@"images"];
+            if (imageIndex < [imageNames count])
+            {
+                imageName = [imageNames objectAtIndex:imageIndex];
+            }
+        }
+        
+        if (imageName)
+        {
+            return [self setPropertyValue:@"image" value:[UIADPropertyValue valueAsString:imageName] context:context];
         }
     }
     else if ([name isEqualToString:@"backgroundColor"])
