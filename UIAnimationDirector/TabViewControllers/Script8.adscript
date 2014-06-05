@@ -1,11 +1,64 @@
 scene(0)
 {
-    resources:"res/resource/Movie/"       # 如果资源图片不在main bundle里，需要指定路径
+    resources:"res/resource/tmall/"
     setDefaultFillMode:"forwards"
-    setDefaultImageScale:0.5
-    
-    object("cat")
+    setDefaultRemovedOnCompletion:0
+    var(PHASE, 1)
+
+    # 第一帧
+    object("cat"):rect:(0, 0, 1r, 1r)
+    event("blink")
     {
-        movie:(images:["app－001000%d.jpg", [1, 5]], interval:0.1, repeat:0, autoreverse:1)
+        object("cat"):movie:(images:["guide_410_cat1_%d", [1, 5]], interval:0.14, repeat:1)
+        if(PHASE == 1):event(2.4):event:"blink"
+    }
+    event:"blink" # 开始播放第一帧
+    
+    # 第二帧
+    event("frame2")
+    {
+        var(PHASE, 2)
+        object("cat"):hide:
+        
+        object("cat2"):rect:(0, 0, 1r, 1r)
+        object("cat2"):movie:(images:["guide_410_cat2_%d", [1, 31]], interval:0.075, repeat:1)
+        event(3):event:"blink2"
+    }
+    
+    event("blink2")
+    {
+        object("cat2"):movie:(images:["guide_410_cat2_2_%d", [1, 5]], interval:0.14, repeat:1)
+        if(PHASE == 2):event(2.5):event:"blink2"
+    }
+    
+    # 第三帧
+    event("frame3")
+    {
+        var(PHASE, 3)
+        object("cat2"):hide:
+
+        object("cat3"):rect:(0, 0, 1r, 1r)
+        object("cat3"):movie:(images:["guide_410_cat3_%d", [1, 29]], interval:0.1, repeat:1)
+        event(3)
+        {
+            for(index, [1, 4]):object("heart%d", [index]):image:"guide_410_heart"
+            object("heart1"):origin:(0.275r, 0.82r)
+            object("heart4"):origin:(0.3r, 0.82r)
+            object("heart2"):origin:(0.26r, 0.83r)
+            object("heart3"):origin:(0.285r, 0.83r)
+            for(index, [1, 4]):object("heart%d", [index]):animateGroup:(animations:[(key:"transform.translation", by:(110 + RANDOM * 10, -75 + RANDOM * 5)), (key:"opacity", to:0)], duration:1.3 + RANDOM / 3, timingFunction:"linear")
+            
+            event(1.5)
+            {
+                object("entry", "guide_410_entry"):origin:(SCREEN_WIDTH - 82, SCREEN_HEIGHT - 54)
+                object("entry"):animate:(key:"transform.scale", values:(0, 1.2, 1), duration:0.4)
+                object("entry"):tapEvent:"onTap"
+                
+                event("onTap")
+                {
+                    invoke:"scrollOut"
+                }
+            }
+        }
     }
 }

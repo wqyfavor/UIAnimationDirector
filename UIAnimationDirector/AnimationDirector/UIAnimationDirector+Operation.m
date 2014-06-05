@@ -357,6 +357,8 @@ void clearLastError(UIADOperationContext* context)
 
 - (void)dealloc
 {
+    [self reset];
+    
     [_timeLines release];
     [_durativeTimeLines release];
     [_functionEvents release];
@@ -644,7 +646,6 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     {
         [entity removeGestureRecognizer:[entity.gestureRecognizers lastObject]];
     }
-    entity.userInteractionEnabled = YES;
     UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc] initWithTarget:delegate action:@selector(onTap:)];
     [entity addGestureRecognizer:tap];
     [tap release];
@@ -692,8 +693,11 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
             }
             else
             {
-                _activeDurativeTimeLine --;
+                // 为保证最后一帧也被执行
+                line.localTime = line.duration;
                 line.inactive = YES;
+                _activeDurativeTimeLine --;
+                [executableLines addObject:line];
             }
         }
     }
@@ -1224,6 +1228,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 + (UIADEntity*)createDefaultEntity
 {
     UIADEntity* entity = [[UIADEntity alloc] initWithFrame:CGRectZero];
+    entity.userInteractionEnabled = YES;
     entity.backgroundColor = [UIColor clearColor];
     return [entity autorelease];
 }
@@ -1237,6 +1242,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
 + (UIADImageEntity*)createDefaultEntity
 {
     UIADImageEntity* entity = [[UIADImageEntity alloc] initWithFrame:CGRectZero];
+    entity.userInteractionEnabled = YES;
     entity.backgroundColor = [UIColor clearColor];
     return [entity autorelease];
 }
@@ -2044,8 +2050,11 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
             }
             else
             {
-                _activeDurativeTimeLine --;
+                // 为保证最后一帧也被执行
+                line.localTime = line.duration;
                 line.inactive = YES;
+                _activeDurativeTimeLine --;
+                [executableLines addObject:line];
             }
         }
     }

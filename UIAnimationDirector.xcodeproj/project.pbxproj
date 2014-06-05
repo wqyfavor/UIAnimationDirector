@@ -79,6 +79,7 @@
 		B84CF83918FE768300349060 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = B84CF83818FE768300349060 /* back.png */; };
 		B85AA6E4193F06C70093E295 /* TabViewController8.m in Sources */ = {isa = PBXBuildFile; fileRef = B85AA6E3193F06C70093E295 /* TabViewController8.m */; };
 		B85AA6E6193F07B30093E295 /* Script8.adscript in Resources */ = {isa = PBXBuildFile; fileRef = B85AA6E5193F07B30093E295 /* Script8.adscript */; };
+		B8601D34194045A10002C2B0 /* example8_bg.jpg in Resources */ = {isa = PBXBuildFile; fileRef = B8601D33194045A10002C2B0 /* example8_bg.jpg */; };
 		B89B56B018FDA30A000C0CEA /* TabViewController7.m in Sources */ = {isa = PBXBuildFile; fileRef = B89B56AF18FDA30A000C0CEA /* TabViewController7.m */; };
 		B89B56B218FDA464000C0CEA /* Script7.adscript in Resources */ = {isa = PBXBuildFile; fileRef = B89B56B118FDA464000C0CEA /* Script7.adscript */; };
 		B8E24C1B18FF76C900817FDE /* Script7_2.adscript in Resources */ = {isa = PBXBuildFile; fileRef = B8E24C1A18FF76C900817FDE /* Script7_2.adscript */; };
@@ -173,6 +174,7 @@
 		B85AA6E2193F06C70093E295 /* TabViewController8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabViewController8.h; sourceTree = "<group>"; };
 		B85AA6E3193F06C70093E295 /* TabViewController8.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabViewController8.m; sourceTree = "<group>"; };
 		B85AA6E5193F07B30093E295 /* Script8.adscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Script8.adscript; sourceTree = "<group>"; };
+		B8601D33194045A10002C2B0 /* example8_bg.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = example8_bg.jpg; sourceTree = "<group>"; };
 		B89B56AE18FDA30A000C0CEA /* TabViewController7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabViewController7.h; sourceTree = "<group>"; };
 		B89B56AF18FDA30A000C0CEA /* TabViewController7.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabViewController7.m; sourceTree = "<group>"; };
 		B89B56B118FDA464000C0CEA /* Script7.adscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Script7.adscript; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 		1374578C167CCB1300A6D19E /* BundleResources */ = {
 			isa = PBXGroup;
 			children = (
+				B8601D33194045A10002C2B0 /* example8_bg.jpg */,
 				AC23F70917433046000C7DDC /* Script5 */,
 				1374578F167CCC2A00A6D19E /* btn_video.png */,
 				1319352F1695F9F600BD3F0C /* btn_lbs.png */,
@@ -462,6 +465,7 @@
 				AC23F74D17433046000C7DDC /* guide_tmall_bg_line@2x.png in Resources */,
 				AC23F74E17433046000C7DDC /* guide_tmall_icon_1.png in Resources */,
 				AC23F74F17433046000C7DDC /* guide_tmall_icon_1@2x.png in Resources */,
+				B8601D34194045A10002C2B0 /* example8_bg.jpg in Resources */,
 				AC23F75017433046000C7DDC /* guide_tmall_icon_2.png in Resources */,
 				AC23F75117433046000C7DDC /* guide_tmall_icon_2@2x.png in Resources */,
 				AC23F75217433046000C7DDC /* guide_tmall_icon_3.png in Resources */,
