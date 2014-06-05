@@ -4,6 +4,10 @@ scene(0)
     setDefaultFillMode:"forwards"
     setDefaultRemovedOnCompletion:0
     var(PHASE, 1)
+    
+    for(index, [1, 3]):object("slideDot%d", [index]):image:"guide_410_page_dot_1"
+    for(index, [1, 3]):object("slideDot%d", [index]):origin:(SCREEN_WIDTH - 10 - 10 - (3 - index) * 15, SCREEN_HEIGHT - 20)
+    object("slideDot1"):image:"guide_410_page_dot_0"
 
     # 第一帧
     object("cat"):rect:(0, 0, 1r, 1r)
@@ -19,10 +23,12 @@ scene(0)
     {
         var(PHASE, 2)
         object("cat"):hide:
+        object("slideDot1"):image:"guide_410_page_dot_1"
+        object("slideDot2"):image:"guide_410_page_dot_0"
         
         object("cat2"):rect:(0, 0, 1r, 1r)
         object("cat2"):movie:(images:["guide_410_cat2_%d", [1, 31]], interval:0.075, repeat:1)
-        event(3):event:"blink2"
+        event(2.3):event:"blink2"
     }
     
     event("blink2")
@@ -36,6 +42,8 @@ scene(0)
     {
         var(PHASE, 3)
         object("cat2"):hide:
+        object("slideDot2"):image:"guide_410_page_dot_1"
+        object("slideDot3"):image:"guide_410_page_dot_0"
 
         object("cat3"):rect:(0, 0, 1r, 1r)
         object("cat3"):movie:(images:["guide_410_cat3_%d", [1, 29]], interval:0.1, repeat:1)
