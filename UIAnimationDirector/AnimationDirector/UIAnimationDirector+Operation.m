@@ -3246,7 +3246,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         if ([_entity isKindOfClass:[UIADImageEntity class]])
         {
             BOOL valid = NO, stretch = NO;
-            NSInteger stretchCapX, stretchCapY;
+            NSInteger stretchCapX = 0, stretchCapY = 0;
             NSString* imageName = nil;
             if (value.type == UIAD_PROPERTY_VALUE_DICTIONARY)
             {
