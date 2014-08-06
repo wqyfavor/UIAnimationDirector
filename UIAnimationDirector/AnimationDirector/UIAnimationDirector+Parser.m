@@ -1338,6 +1338,8 @@ enum UIAD_PARSER_LINE_SEGMENT
 
 + (UIADOperation*)parseAssignmentOperationWithTarget:(UIView*)target script:(NSString*)script
 {
+    static UIADScene* _default_scene = nil;
+    
     NSRange colonRange = [script rangeOfString:@":"];
     if (colonRange.length <= 0)
     {
@@ -1362,7 +1364,10 @@ enum UIAD_PARSER_LINE_SEGMENT
         return nil;
     }
     
-    UIADObject* object = [[[UIADObject alloc] initWithExternal:@"" scene:nil entity:target] autorelease];
+    if (_default_scene == nil)
+        _default_scene = [[UIADScene alloc] initWithAbsoluteTime:0.0f name:@"default"];
+    
+    UIADObject* object = [[[UIADObject alloc] initWithExternal:@"" scene:_default_scene entity:target] autorelease];
     if (![object isValidPropertyValueForProperty:propertyName value:propertyValue])
     {
         return nil;

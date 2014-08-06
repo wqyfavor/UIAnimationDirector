@@ -352,3 +352,17 @@
 }
 
 @end
+
+@implementation UIView (UIANIMATION_DIRECTOR)
+
+- (void)executeAnimationScript:(NSString*)script
+{
+    [UIAnimationDirector executeOperationWithTarget:self script:script delegate:nil];
+}
+
+- (void)executeAnimationScript:(NSString*)script delegate:(id)delegate
+{
+    [UIAnimationDirector executeOperationWithTarget:self script:script delegate:delegate];
+}
+
+@end

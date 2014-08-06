@@ -35,6 +35,7 @@
 {
     [_contentView release];
     [_animationView release];
+    [_animationView2 release];
     [super dealloc];
 }
 

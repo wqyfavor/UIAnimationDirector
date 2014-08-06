@@ -67,3 +67,10 @@
 + (BOOL)executeOperationWithTarget:(UIADEntity*)target script:(NSString*)script delegate:(id)delegate;
 
 @end
+
+@interface UIView (UIANIMATION_DIRECTOR)
+
+- (void)executeAnimationScript:(NSString*)script;
+- (void)executeAnimationScript:(NSString*)script delegate:(id)delegate;
+
+@end

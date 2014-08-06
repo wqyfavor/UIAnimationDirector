@@ -33,6 +33,7 @@
 
 - (void)dealloc
 {
+    [_contentScrollView release];
     [_animationView release];
     [super dealloc];
 }

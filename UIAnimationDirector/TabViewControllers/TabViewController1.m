@@ -25,6 +25,8 @@
 {
     [_animationDirector release];
     [_btnRunDot5xSpeed release];
+    [_btnRun1xSpeed release];
+    [_btnRun2xSpeed release];
     [super dealloc];
 }
 

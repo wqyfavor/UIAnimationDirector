@@ -9,6 +9,10 @@
 #import "TestEntriesViewController.h"
 #import "AppDelegate.h"
 
+const NSInteger TEST_COUNT = 9;
+NSString* const TEST_NAMES[TEST_COUNT] = {@"Basic & Speed", @"Recursive", @"Snow Fall", @"Complicated Time Line",
+    @"Tmall 2.0 Show", @"Marquee Text", @"Manual Animation", @"Movie", @"Animation for UIView"};
+
 @interface TestEntriesViewController ()
 {
     UITableView* _tableView;
@@ -31,7 +35,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 8;
+    return TEST_COUNT;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -41,7 +45,7 @@
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
     }
-    cell.textLabel.text = [NSString stringWithFormat:@"Test%d", indexPath.row + 1];
+    cell.textLabel.text = TEST_NAMES[indexPath.row];
     return cell;
 }
 
