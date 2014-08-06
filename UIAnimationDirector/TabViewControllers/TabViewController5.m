@@ -24,16 +24,6 @@
 
 @implementation TabViewController5
 
-- (id)init
-{
-    if (self = [super init])
-    {
-        self.title = @"Example5";
-    }
-    
-    return self;
-}
-
 - (void)dealloc
 {
     [_backgroundScrollView release];

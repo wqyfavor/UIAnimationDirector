@@ -78,6 +78,8 @@
 		B841BB9C19925A6800E464F4 /* TabViewController9.m in Sources */ = {isa = PBXBuildFile; fileRef = B841BB9B19925A6800E464F4 /* TabViewController9.m */; };
 		B841BBA319925B8D00E464F4 /* btn_nor.png in Resources */ = {isa = PBXBuildFile; fileRef = B841BBA119925B8D00E464F4 /* btn_nor.png */; };
 		B841BBA419925B8D00E464F4 /* btn_press.png in Resources */ = {isa = PBXBuildFile; fileRef = B841BBA219925B8D00E464F4 /* btn_press.png */; };
+		B841BBA719926BC500E464F4 /* TabViewController10.m in Sources */ = {isa = PBXBuildFile; fileRef = B841BBA619926BC500E464F4 /* TabViewController10.m */; };
+		B841BBA919926D6400E464F4 /* Script10.adscript in Resources */ = {isa = PBXBuildFile; fileRef = B841BBA819926D6400E464F4 /* Script10.adscript */; };
 		B84CF83718FE730E00349060 /* TestEntriesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B84CF83618FE730E00349060 /* TestEntriesViewController.m */; };
 		B84CF83918FE768300349060 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = B84CF83818FE768300349060 /* back.png */; };
 		B85AA6E4193F06C70093E295 /* TabViewController8.m in Sources */ = {isa = PBXBuildFile; fileRef = B85AA6E3193F06C70093E295 /* TabViewController8.m */; };
@@ -175,6 +177,9 @@
 		B841BB9B19925A6800E464F4 /* TabViewController9.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabViewController9.m; sourceTree = "<group>"; };
 		B841BBA119925B8D00E464F4 /* btn_nor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_nor.png; sourceTree = "<group>"; };
 		B841BBA219925B8D00E464F4 /* btn_press.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_press.png; sourceTree = "<group>"; };
+		B841BBA519926BC500E464F4 /* TabViewController10.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabViewController10.h; sourceTree = "<group>"; };
+		B841BBA619926BC500E464F4 /* TabViewController10.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabViewController10.m; sourceTree = "<group>"; };
+		B841BBA819926D6400E464F4 /* Script10.adscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Script10.adscript; sourceTree = "<group>"; };
 		B84CF83518FE730E00349060 /* TestEntriesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestEntriesViewController.h; sourceTree = "<group>"; };
 		B84CF83618FE730E00349060 /* TestEntriesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestEntriesViewController.m; sourceTree = "<group>"; };
 		B84CF83818FE768300349060 /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = back.png; path = UIAnimationDirector/BundleResources/back.png; sourceTree = SOURCE_ROOT; };
@@ -312,6 +317,8 @@
 				B85AA6E3193F06C70093E295 /* TabViewController8.m */,
 				B841BB9A19925A6800E464F4 /* TabViewController9.h */,
 				B841BB9B19925A6800E464F4 /* TabViewController9.m */,
+				B841BBA519926BC500E464F4 /* TabViewController10.h */,
+				B841BBA619926BC500E464F4 /* TabViewController10.m */,
 				139E1622167CC2810024148E /* Script1.adscript */,
 				13ED8375167D7FE300BF56C8 /* Script2.adscript */,
 				13EE919C168F22E6006263B9 /* Script3.adscript */,
@@ -321,6 +328,7 @@
 				B89B56B118FDA464000C0CEA /* Script7.adscript */,
 				B8E24C1A18FF76C900817FDE /* Script7_2.adscript */,
 				B85AA6E5193F07B30093E295 /* Script8.adscript */,
+				B841BBA819926D6400E464F4 /* Script10.adscript */,
 			);
 			path = TabViewControllers;
 			sourceTree = "<group>";
@@ -477,6 +485,7 @@
 				AC23F74C17433046000C7DDC /* guide_tmall_bg_line.png in Resources */,
 				AC23F74D17433046000C7DDC /* guide_tmall_bg_line@2x.png in Resources */,
 				AC23F74E17433046000C7DDC /* guide_tmall_icon_1.png in Resources */,
+				B841BBA919926D6400E464F4 /* Script10.adscript in Resources */,
 				AC23F74F17433046000C7DDC /* guide_tmall_icon_1@2x.png in Resources */,
 				B8601D34194045A10002C2B0 /* example8_bg.jpg in Resources */,
 				AC23F75017433046000C7DDC /* guide_tmall_icon_2.png in Resources */,
@@ -500,6 +509,7 @@
 				13FA5ED4167C4A0C004CF523 /* UIAnimationDirector+Operation.m in Sources */,
 				13FA5ED5167C4A0C004CF523 /* UIAnimationDirector+Parser.m in Sources */,
 				13FA5ED6167C4A0C004CF523 /* UIAnimationDirector.m in Sources */,
+				B841BBA719926BC500E464F4 /* TabViewController10.m in Sources */,
 				13FA5EDF167C50A3004CF523 /* TabViewController1.m in Sources */,
 				13FA5EE2167C52B2004CF523 /* TabViewController2.m in Sources */,
 				B84CF83718FE730E00349060 /* TestEntriesViewController.m in Sources */,

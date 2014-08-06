@@ -12,16 +12,6 @@
 
 @implementation TabViewController2
 
-- (id)init
-{
-    if (self = [super init])
-    {
-        self.title = @"Example2";
-    }
-    
-    return self;
-}
-
 - (void)dealloc
 {
     [_textView release];

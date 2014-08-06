@@ -10,16 +10,6 @@
 
 @implementation TabViewController3
 
-- (id)init
-{
-    if (self = [super init])
-    {
-        self.title = @"Example3";
-    }
-    
-    return self;
-}
-
 - (void)dealloc
 {
     [_snowCountLabel release];

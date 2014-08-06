@@ -1,0 +1,24 @@
+scene(0)
+{
+    setDefaultFillMode:"forwards"
+    setDefaultRemovedOnCompletion:0
+    
+    object("image1"):image:"http://img.taobaocdn.com/bao/uploaded/TB14E12FVXXXXbQXVXXSutbFXXX.jpg_180x180.jpg"
+    object("image2"):image:"http://img.taobaocdn.com/bao/uploaded/TB1cImOFVXXXXXIXVXXSutbFXXX.jpg_180x180.jpg"
+    object("image3"):image:"http://img.taobaocdn.com/bao/uploaded/TB1qZqVFVXXXXajXXXXSutbFXXX.jpg_180x180.jpg"
+    object("image4"):image:"http://img.taobaocdn.com/bao/uploaded/TB1Eo6aFVXXXXXDXVXXSutbFXXX.jpg_180x180.jpg"
+    object("image5"):image:"http://img.taobaocdn.com/bao/uploaded/TB1TNWNFVXXXXX2XXXXSutbFXXX.jpg_180x180.jpg"
+    
+    for(index, [1, 5]):object("image%d", [index]):rect:(-100 - (5 - index) * 20, -100 - (5 - index) * 20, 100, 100)
+
+    event("fly", ["imageIndex", "step"])
+    {
+        if(imageIndex >= 1 & imageIndex <= 5)
+        {
+            object("image%d", [imageIndex]):animate:(key:"transform.translation", by:(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2 + 100), duration:0.3, timingFunction:"easeOut")
+            event(0.1):event:("fly", [imageIndex + step, step])
+        }
+    }
+    event(1):event:("fly", [1, 1])
+    event(3):event:("fly", [5, -1])
+}

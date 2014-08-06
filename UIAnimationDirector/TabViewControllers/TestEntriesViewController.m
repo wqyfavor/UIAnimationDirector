@@ -9,9 +9,9 @@
 #import "TestEntriesViewController.h"
 #import "AppDelegate.h"
 
-const NSInteger TEST_COUNT = 9;
+const NSInteger TEST_COUNT = 10;
 NSString* const TEST_NAMES[TEST_COUNT] = {@"Basic & Speed", @"Recursive", @"Snow Fall", @"Complicated Time Line",
-    @"Tmall 2.0 Show", @"Marquee Text", @"Manual Animation", @"Movie", @"Animation for UIView"};
+    @"Tmall 2.0 Show", @"Marquee Text", @"Manual Animation", @"Movie", @"Animation for UIView", @"Download"};
 
 @interface TestEntriesViewController ()
 {

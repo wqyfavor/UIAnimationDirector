@@ -11,16 +11,6 @@
 
 @implementation TabViewController1
 
-- (id)init
-{
-    if (self = [super init])
-    {
-        self.title = @"Example1";
-    }
-    
-    return self;
-}
-
 - (void)dealloc
 {
     [_animationDirector release];

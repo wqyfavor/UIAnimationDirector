@@ -24,7 +24,6 @@
 {
     if (self = [super init])
     {
-        self.title = @"Example8";
         DO_NOT_USE_IOS_7_LAYOUT(self)
     }
     
