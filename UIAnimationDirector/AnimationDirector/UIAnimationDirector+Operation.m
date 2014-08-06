@@ -5064,7 +5064,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             }
             else
             {
-                setLastError(context, @"Invalid agruments.");
+                setLastError(context, @"Invalid arguments.");
                 return nil;
             }
         }
@@ -5087,12 +5087,12 @@ const int UIAD_NUM_OP_PRIORITY[] =
         }
         else if (value.type == UIAD_PROPERTY_VALUE_ARRAY)
         {
-            setLastError(context, @"Invalid agruments.");
+            setLastError(context, @"Invalid arguments.");
             return nil;
         }
         else
         {
-            setLastError(context, @"Invalid agruments.");
+            setLastError(context, @"Invalid arguments.");
             return nil;
         }
     }
