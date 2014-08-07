@@ -55,6 +55,7 @@ NSString* const TEST_NAMES[TEST_COUNT] = {@"Basic & Speed", @"Recursive", @"Snow
     
     id viewController = [[NSClassFromString([NSString stringWithFormat:@"TabViewController%d", indexPath.row + 1]) alloc] init];
     [self presentModalViewController:viewController animated:YES];
+    [viewController release];
     
     UIWindow* window = ((AppDelegate*)([UIApplication sharedApplication].delegate)).window;
     UIButton* btn = [UIButton buttonWithType:UIButtonTypeCustom];

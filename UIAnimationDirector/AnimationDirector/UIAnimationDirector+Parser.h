@@ -10,6 +10,7 @@
 
 @class UIADProgram;
 @class UIADOperation;
+@class UIADScene;
 
 // 异常比较简单，只要告诉哪一行没编过去就行了
 @interface UIADParserException : NSException
@@ -37,6 +38,7 @@
 - (id)initWithScript:(NSString*)script;
 - (void)parse;
 
++ (UIADScene*)getDefaultScene;
 + (UIADOperation*)parseAssignmentOperationWithTarget:(UIView*)target script:(NSString*)script; // 解析一条赋值脚本并返回operation，对target进行操作的operation
 
 @end

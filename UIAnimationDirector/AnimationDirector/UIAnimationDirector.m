@@ -11,6 +11,146 @@
 
 #import <mach/mach_time.h>
 
+@class UIAnimationThread;
+
+@interface UIAnimationDirector ()
+{
+    NSString* _script;
+    NSString* _filePath;
+    UIAnimationThread* _animationThread;
+}
+
++ (void)removeOperationByThread:(UIAnimationThread*)thread;
+
+@end
+
+@interface UIAnimationThread : NSObject
+
+@property (nonatomic, retain) UIADOperationContext* context;
+@property (nonatomic, readonly) NSThread* thread;
+@property (nonatomic, assign) id owner;
+
+@property (nonatomic, readonly) BOOL isCancelled;
+
+- (void)start;
+- (void)cancel;
+
+@end
+
+@implementation UIAnimationThread
+
+- (id)init
+{
+    if (self = [super init])
+    {
+        _thread = [[NSThread alloc] initWithTarget:self selector:@selector(threadEvent) object:nil];
+        [_thread setThreadPriority:1.0];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    if (_thread && ![_thread isCancelled])
+    {
+        [_thread cancel];
+        [_thread release];
+    }
+    [_context release];
+    [super dealloc];
+}
+
+- (void)threadEvent
+{
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    
+    struct mach_timebase_info timebase;
+    mach_timebase_info(&timebase);
+    double timebase_ratio = ((double)timebase.numer / (double)timebase.denom) * 1.0e-9;
+    NSTimeInterval start = mach_absolute_time() * timebase_ratio;
+    
+    srandom(time(0));
+    srand(time(0));
+    
+    [_owner performSelectorOnMainThread:@selector(didTimerEventStart:) withObject:[NSArray arrayWithObjects:[NSNumber numberWithDouble:start], [NSNumber numberWithDouble:timebase_ratio], nil] waitUntilDone:NO];
+    
+    while (![[NSThread currentThread] isCancelled] && ![_context.program finished:_context.now])
+    {
+        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+        
+        NSTimeInterval modification = 0;
+        NSTimeInterval now = (mach_absolute_time() * timebase_ratio - start) * _context.speed; // 计算启动多久了
+        
+        NSArray* executableLines = [_context.program getExecutableLines:now modification:&modification];
+        start += modification;
+        
+        _context.now = now;
+        for (int i = 0; i < [executableLines count]; i ++)
+        {
+            UIADTimeLine* line = [executableLines objectAtIndex:i];
+            for (int t = 0; t < [line.operations count]; t ++)
+            {
+                UIADOperation* operation = [line.operations objectAtIndex:t];
+                if (_owner)
+                    [_owner performSelectorOnMainThread:@selector(executeOperation:) withObject:operation waitUntilDone:NO];
+                else
+                    [self performSelectorOnMainThread:@selector(executeOperation:) withObject:operation waitUntilDone:NO];
+            }
+        }
+        
+        [pool drain];
+        
+        [NSThread sleepForTimeInterval:0.001]; // 每一毫秒休息一次
+    }
+    
+    if (_owner)
+        [_owner performSelectorOnMainThread:@selector(didAllOperationsExecute) withObject:nil waitUntilDone:NO];
+    else
+        [UIAnimationDirector removeOperationByThread:self];
+    
+    [pool drain];
+}
+
+- (void)executeOperation:(UIADOperation*)operation
+{
+    @try
+    {
+        if (![operation execute:_context])
+        {
+        }
+    }
+    @catch (NSException *exception)
+    {
+    }
+    @finally
+    {
+    }
+}
+
+- (void)start
+{
+    [_thread start];
+}
+
+- (void)cancel
+{
+    if (![_thread isCancelled])
+    {
+        [_thread cancel];
+    }
+    [_thread release];
+    _thread = nil;
+}
+
+- (BOOL)isCancelled
+{
+    return [_thread isCancelled];
+}
+
+@end
+
+#pragma mark -
+
 @implementation UIAnimationDirector
 
 @synthesize program = _program;
@@ -72,15 +212,17 @@
 
 - (void)dealloc
 {
+    _animationThread.owner = nil;
+    if (_animationThread && ![_animationThread isCancelled])
+    {
+        [_animationThread cancel];
+        [_animationThread release];
+    }
+    
     [_context release];
     [_script release];
     [_filePath release];
-    
-    if (_timerThread && ![_timerThread isCancelled])
-    {
-        [_timerThread cancel];
-        [_timerThread release];
-    }
+
     [_program cancelDownloads];
     [_program release];
     
@@ -121,51 +263,6 @@
     }
 }
 
-- (void)timerThreadEvent
-{
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    struct mach_timebase_info timebase;
-    mach_timebase_info(&timebase);
-    double timebase_ratio = ((double)timebase.numer / (double)timebase.denom) * 1.0e-9;
-    NSTimeInterval start = mach_absolute_time() * timebase_ratio;
-    
-    srandom(time(0));
-    srand(time(0));
-    
-    [self performSelectorOnMainThread:@selector(didTimerEventStart:) withObject:[NSArray arrayWithObjects:[NSNumber numberWithDouble:start], [NSNumber numberWithDouble:timebase_ratio], nil] waitUntilDone:NO];
-    
-    while (![[NSThread currentThread] isCancelled] && ![_program finished:_context.now])
-    {
-        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-        
-        NSTimeInterval modification = 0;
-        NSTimeInterval now = (mach_absolute_time() * timebase_ratio - start) * _speed; // 计算启动多久了
-
-        NSArray* executableLines = [_program getExecutableLines:now modification:&modification];
-        start += modification;
-        
-        _context.now = now;
-        for (int i = 0; i < [executableLines count]; i ++)
-        {
-            UIADTimeLine* line = [executableLines objectAtIndex:i];
-            for (int t = 0; t < [line.operations count]; t ++)
-            {
-                UIADOperation* operation = [line.operations objectAtIndex:t];
-                [self performSelectorOnMainThread:@selector(executeOperation:) withObject:operation waitUntilDone:NO];
-            }
-        }
-        
-        [pool drain];
-        
-        [NSThread sleepForTimeInterval:0.001]; // 每一毫秒休息一次
-    }
-    
-    [self performSelectorOnMainThread:@selector(didAllOperationsExecute) withObject:nil waitUntilDone:NO];
-    
-    [pool drain];
-}
-
 - (void)reset
 {
     [self stop];
@@ -196,19 +293,19 @@
             [_delegate shouldRegisterMacros:self];
         }
         
-        if (_timerThread)
+        if (_animationThread)
         {
-            if (![_timerThread isCancelled])
+            if (![_animationThread isCancelled])
             {
-                [_timerThread cancel];
+                [_animationThread cancel];
             }
-            
-            [_timerThread release];
+            [_animationThread release];
         }
         
-        _timerThread = [[NSThread alloc] initWithTarget:self selector:@selector(timerThreadEvent) object:nil];
-        [_timerThread setThreadPriority:1.0];
-        [_timerThread start];
+        _animationThread = [[UIAnimationThread alloc] init];
+        _animationThread.owner = self;
+        _animationThread.context = _context;
+        [_animationThread start];
     }
 }
 
@@ -222,12 +319,12 @@
 
 - (void)finish
 {
-    if (![_timerThread isCancelled])
+    if (![_animationThread isCancelled])
     {
-        [_timerThread cancel];
+        [_animationThread cancel];
     }
-    [_timerThread release];
-    _timerThread = nil;
+    [_animationThread release];
+    _animationThread = nil;
     _running = NO;
 }
 
@@ -270,34 +367,57 @@
     }
 }
 
+static NSMutableArray* _execute_on_single_object_queue = nil;
+
++ (void)removeOperationByThread:(UIAnimationThread*)thread
+{
+    @synchronized(_execute_on_single_object_queue)
+    {
+        for (int i = 0; i < [_execute_on_single_object_queue count]; i ++)
+        {
+            NSDictionary* dict = [_execute_on_single_object_queue objectAtIndex:i];
+            if ([dict objectForKey:@"thread"] == thread)
+            {
+                [_execute_on_single_object_queue removeObjectAtIndex:i];
+                break;
+            }
+        }
+    }
+}
+
 + (BOOL)executeOperationWithTarget:(UIADEntity*)target script:(NSString*)script delegate:(id)delegate
 {
     UIADOperation* operation = [UIADParser parseAssignmentOperationWithTarget:target script:script];
     if (operation)
     {
+        if (_execute_on_single_object_queue == nil)
+            _execute_on_single_object_queue = [[NSMutableArray alloc] initWithCapacity:10];
+        
+        UIADProgram* program = [[UIADProgram alloc] init];
+        [[program getTimeLine:0.0f] addOperation:UIAD_OPERATION_ASSIGN parameters:operation.parameters line:0 runtime:NO precondition:UIAD_NO_PRECONDITION];
+        
         // 执行
         UIADOperationContext* context = [[UIADOperationContext alloc] init];
-        context.speed = 1;
+        context.speed = 1.0f;
         context.mainView = nil;
-        context.program = nil;
+        context.program = program;
         context.invokeResponder = nil;
         context.operationWithTarget = YES;
         context.animationDelegate = delegate;
         
-        @try
+        UIAnimationThread* thread = [[UIAnimationThread alloc] init];
+        thread.context = context;
+        
+        @synchronized(_execute_on_single_object_queue)
         {
-            if ([operation execute:context])
-            {
-                return YES;
-            }
+            [_execute_on_single_object_queue addObject:[NSDictionary dictionaryWithObjectsAndKeys:program, @"program", thread, @"thread", nil]];
         }
-        @catch (NSException *exception)
-        {
-        }
-        @finally
-        {
-            [context release];
-        }
+        
+        [thread start];
+        
+        [context release];
+        [program release];
+        [thread release];
     }
     
     return NO;
@@ -354,6 +474,11 @@
 @end
 
 @implementation UIView (UIANIMATION_DIRECTOR)
+
++ (UIADScene*)getDefaultScene
+{
+    return [UIADParser getDefaultScene];
+}
 
 - (void)executeAnimationScript:(NSString*)script
 {

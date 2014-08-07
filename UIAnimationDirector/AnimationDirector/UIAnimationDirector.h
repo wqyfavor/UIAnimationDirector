@@ -32,12 +32,7 @@
     
     double _speed;
     
-    NSString* _script;
-    NSString* _filePath;
-    
     UIADProgram* _program;
-    
-    NSThread* _timerThread;
     UIADOperationContext* _context;
     
     id<UIAnimationDirectorDelegate> _delegate;        // UIAnimationDirector的回调
@@ -69,6 +64,8 @@
 @end
 
 @interface UIView (UIANIMATION_DIRECTOR)
+
++ (UIADScene*)getDefaultScene; // 用于执行UIView动画的默认的scene，可以用来设置图片资源的位置等
 
 - (void)executeAnimationScript:(NSString*)script;
 - (void)executeAnimationScript:(NSString*)script delegate:(id)delegate;

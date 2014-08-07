@@ -344,14 +344,14 @@ enum UIAD_RESOURCE_TYPE
 @property (nonatomic, readonly) NSString* name;
 @property (nonatomic, readonly) NSMutableDictionary* objects;
 @property (nonatomic, retain) UIADEntity* entity;
-@property (nonatomic, readonly) int resourceType;
-@property (nonatomic, readonly) NSString* mainPath;
 
-@property (nonatomic, readonly) NSString* defaultFillMode;
-@property (nonatomic, readonly) NSString* defaultTimingFunction;
-@property (nonatomic, readonly) BOOL defaultRemovedOnCompletion;
-@property (nonatomic, readonly) CFTimeInterval defaultDuration;
-@property (nonatomic, readonly) double defaultImageScale; // 场景内的图片加载后，会设置一次对象的尺寸，使和图片相同，这个是默认的尺寸缩放比例
+@property (nonatomic, assign) int resourceType;
+@property (nonatomic, copy) NSString* mainPath;
+@property (nonatomic, copy) NSString* defaultFillMode;
+@property (nonatomic, copy) NSString* defaultTimingFunction;
+@property (nonatomic, assign) BOOL defaultRemovedOnCompletion;
+@property (nonatomic, assign) CFTimeInterval defaultDuration;
+@property (nonatomic, assign) double defaultImageScale; // 场景内的图片加载后，会设置一次对象的尺寸，使和图片相同，这个是默认的尺寸缩放比例
 
 - (id)initWithAbsoluteTime:(NSTimeInterval)absoluteTime name:(NSString*)name;
 - (UIADObject*)objectWithName:(NSString*)name;

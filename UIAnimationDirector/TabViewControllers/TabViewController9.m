@@ -13,6 +13,7 @@
 {
     UIImageView* _imageView1;
     UIImageView* _imageView2;
+    UIImageView* _animateView;
     UIButton* _button;
 }
 
@@ -47,10 +48,14 @@
     _button.frame = CGRectMake((self.view.bounds.size.width - 100) / 2, 200, 100, 30);
     [_button addTarget:self action:@selector(onButtonClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_button];
+    
+    _animateView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:_animateView];
 }
 
 - (void)onButtonClick:(id)sender
 {
+    [UIView getDefaultScene].resourceType = UIAD_RESOURCE_MAIN_BUNDLE;
     [_imageView1 executeAnimationScript:@"animate:(key:\"transform.rotation\", duration:1.5, by:2 * PI)"];
     [_imageView2 executeAnimationScript:@"transit:(image:\"btn_lbs.png\", duration:0.7, transition:\"flipLeft\")"];
     
@@ -91,6 +96,10 @@
     [keyAni release];
     [ani2 release];
  */
+    
+    [UIView getDefaultScene].resourceType = UIAD_RESOURCE_PATH;
+    [UIView getDefaultScene].mainPath = @"res/resource/tmall/";
+    [_animateView executeAnimationScript:@"movie:(images:[\"guide_410_cat2_2_%d\", [1, 5]], interval:0.14, repeat:1)"];
 }
 
 @end

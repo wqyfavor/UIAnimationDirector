@@ -1336,10 +1336,15 @@ enum UIAD_PARSER_LINE_SEGMENT
     [_program sort];
 }
 
+static UIADScene* _default_scene = nil;
+
++ (UIADScene*)getDefaultScene
+{
+    return _default_scene;
+}
+
 + (UIADOperation*)parseAssignmentOperationWithTarget:(UIView*)target script:(NSString*)script
 {
-    static UIADScene* _default_scene = nil;
-    
     NSRange colonRange = [script rangeOfString:@":"];
     if (colonRange.length <= 0)
     {
