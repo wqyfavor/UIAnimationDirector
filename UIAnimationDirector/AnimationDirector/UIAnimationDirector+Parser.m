@@ -1340,6 +1340,10 @@ static UIADScene* _default_scene = nil;
 
 + (UIADScene*)getDefaultScene
 {
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        _default_scene = [[UIADScene alloc] initWithAbsoluteTime:0.0f name:@"default"];
+    });
     return _default_scene;
 }
 
@@ -1368,9 +1372,6 @@ static UIADScene* _default_scene = nil;
     {
         return nil;
     }
-    
-    if (_default_scene == nil)
-        _default_scene = [[UIADScene alloc] initWithAbsoluteTime:0.0f name:@"default"];
     
     UIADObject* object = [[[UIADObject alloc] initWithExternal:@"" scene:_default_scene entity:target] autorelease];
     if (![object isValidPropertyValueForProperty:propertyName value:propertyValue])

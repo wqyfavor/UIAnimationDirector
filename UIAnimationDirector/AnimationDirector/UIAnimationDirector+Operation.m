@@ -1358,6 +1358,19 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     [super dealloc];
 }
 
+- (void)setMainPath:(NSString *)mainPath
+{
+    [_mainPath release];
+    _mainPath = nil;
+    if (mainPath)
+    {
+        if (_resourceType == UIAD_RESOURCE_PATH && [mainPath hasPrefix:@"res/"])
+            _mainPath = [[NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] resourcePath], [mainPath substringFromIndex:4]] retain];
+        else
+            _mainPath = [mainPath retain];
+    }
+}
+
 - (UIADObject*)objectWithName:(NSString*)name
 {
     UIADObject* object = [_objects objectForKey:name];
@@ -1548,42 +1561,39 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     }
     else if ([name isEqualToString:@"image"])
     {
-        if ([_entity isKindOfClass:[UIADImageEntity class]])
+        BOOL valid = NO, stretch = NO;
+        NSInteger stretchCapX, stretchCapY;
+        NSString* imageName = nil;
+        
+        if (value.type == UIAD_PROPERTY_VALUE_DICTIONARY)
         {
-            BOOL valid = NO, stretch = NO;
-            NSInteger stretchCapX, stretchCapY;
-            NSString* imageName = nil;
+            stretch = YES;
+            UIADPropertyValue* imageNameValue = [value.dictionaryValue objectForKey:@"image"];
+            imageName = [imageNameValue evaluateFormatAsStringWithObject:nil context:context];
             
-            if (value.type == UIAD_PROPERTY_VALUE_DICTIONARY)
+            UIADPropertyValue* stretchCapValue = [value.dictionaryValue objectForKey:@"stretchCap"];
+            valid = [self getImageCapParameters:stretchCapValue capX:&stretchCapX capY:&stretchCapY object:nil context:context];
+        }
+        else
+        {
+            valid = YES;
+            imageName = [value evaluateFormatAsStringWithObject:nil context:context];
+        }
+        
+        if (imageName && valid)
+        {
+            UIImage* image = [self getImageFile:imageName context:context];
+            if (image)
             {
-                stretch = YES;
-                UIADPropertyValue* imageNameValue = [value.dictionaryValue objectForKey:@"image"];
-                imageName = [imageNameValue evaluateFormatAsStringWithObject:nil context:context];
-                
-                UIADPropertyValue* stretchCapValue = [value.dictionaryValue objectForKey:@"stretchCap"];
-                valid = [self getImageCapParameters:stretchCapValue capX:&stretchCapX capY:&stretchCapY object:nil context:context];
-            }
-            else
-            {
-                valid = YES;
-                imageName = [value evaluateFormatAsStringWithObject:nil context:context];
-            }
-
-            if (imageName && valid)
-            {
-                UIImage* image = [self getImageFile:imageName context:context];
-                if (image)
+                if (stretch)
                 {
-                    if (stretch)
-                    {
-                        ((UIADImageEntity*)_entity).image = [image stretchableImageWithLeftCapWidth:stretchCapX topCapHeight:stretchCapY];
-                    }
-                    else
-                    {
-                        ((UIADImageEntity*)_entity).image = image;
-                    }
-                    return YES;
+                    [_entity setValue:[image stretchableImageWithLeftCapWidth:stretchCapX topCapHeight:stretchCapY] forKey:@"image"];
                 }
+                else
+                {
+                    [_entity setValue:image forKey:@"image"];
+                }
+                return YES;
             }
         }
     }
@@ -3206,11 +3216,11 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         _resourceImageSize = image.size;
         if (stretch)
         {
-            ((UIADImageEntity*)_entity).image = [image stretchableImageWithLeftCapWidth:capX topCapHeight:capY];
+            [_entity setValue:[image stretchableImageWithLeftCapWidth:capX topCapHeight:capY] forKey:@"image"];
         }
         else
         {
-            ((UIADImageEntity*)_entity).image = image;
+            [_entity setValue:image forKey:@"image"];
         }
         
         if (!_sizeModified)
@@ -3243,30 +3253,27 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
     
     if ([name isEqualToString:@"image"])
     {
-        if ([_entity isKindOfClass:[UIADImageEntity class]])
+        BOOL valid = NO, stretch = NO;
+        NSInteger stretchCapX = 0, stretchCapY = 0;
+        NSString* imageName = nil;
+        if (value.type == UIAD_PROPERTY_VALUE_DICTIONARY)
         {
-            BOOL valid = NO, stretch = NO;
-            NSInteger stretchCapX = 0, stretchCapY = 0;
-            NSString* imageName = nil;
-            if (value.type == UIAD_PROPERTY_VALUE_DICTIONARY)
-            {
-                stretch = YES;
-                UIADPropertyValue* imageNameValue = [value.dictionaryValue objectForKey:@"image"];
-                imageName = [imageNameValue evaluateFormatAsStringWithObject:self context:context];
-                
-                UIADPropertyValue* stretchCapValue = [value.dictionaryValue objectForKey:@"stretchCap"];
-                valid = [_scene getImageCapParameters:stretchCapValue capX:&stretchCapX capY:&stretchCapY object:self context:context];
-            }
-            else
-            {
-                valid = YES;
-                imageName = [value evaluateFormatAsStringWithObject:self context:context];
-            }
+            stretch = YES;
+            UIADPropertyValue* imageNameValue = [value.dictionaryValue objectForKey:@"image"];
+            imageName = [imageNameValue evaluateFormatAsStringWithObject:self context:context];
             
-            if (imageName && valid)
-            {
-                return [self loadImage:imageName context:context stretch:stretch capX:stretchCapX capY:stretchCapY];
-            }
+            UIADPropertyValue* stretchCapValue = [value.dictionaryValue objectForKey:@"stretchCap"];
+            valid = [_scene getImageCapParameters:stretchCapValue capX:&stretchCapX capY:&stretchCapY object:self context:context];
+        }
+        else
+        {
+            valid = YES;
+            imageName = [value evaluateFormatAsStringWithObject:self context:context];
+        }
+        
+        if (imageName && valid)
+        {
+            return [self loadImage:imageName context:context stretch:stretch capX:stretchCapX capY:stretchCapY];
         }
     }
     else if ([name isEqualToString:@"movie"])

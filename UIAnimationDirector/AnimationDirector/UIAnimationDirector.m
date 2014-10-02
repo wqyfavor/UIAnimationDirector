@@ -122,9 +122,6 @@
     @catch (NSException *exception)
     {
     }
-    @finally
-    {
-    }
 }
 
 - (void)start
@@ -345,9 +342,6 @@
         {
             [_delegate didAnimationExecutionFail:self];
         }
-    }
-    @finally
-    {
     }
 }
 
