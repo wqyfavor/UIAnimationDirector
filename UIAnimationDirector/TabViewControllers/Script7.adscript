@@ -9,8 +9,6 @@ scene(0)
     
     for(index, [1, 5]):object("background%d", [index]):image:("guide_b%d", [index])
     for(index, [1, 5]):object("background%d", [index]):origin:((index - 1) * parent.WIDTH, 0)
-    
-    image:"asdfdsf"
 
     object("document1")
     {

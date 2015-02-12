@@ -4665,6 +4665,8 @@ const int UIAD_NUM_OP_PRIORITY[] =
     int i = 0;
     while (i < [_stringValue length])
     {
+        BOOL canBeSign = NO;
+        BOOL newOperand = NO;
         BOOL state = YES;
         unichar c = [_stringValue characterAtIndex:i];
         unichar nextC = (i < [_stringValue length] - 1) ? [_stringValue characterAtIndex:i + 1] : (unichar)0;
@@ -4680,6 +4682,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                 break;
             case '(':
                 [operators push:UIAD_NUM_OP_OF(UIAD_NUM_OP_LB)];
+                canBeSign = YES;
                 break;
             case ')':
                 state = [self popWithOperator:UIAD_NUM_OP_OF(UIAD_NUM_OP_RB) operandStack:operands operatorStack:operators];
@@ -4728,6 +4731,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     i ++;
                     state = [self popWithOperator:UIAD_NUM_OP_OF(UIAD_NUM_OP_NOT_EQU) operandStack:operands operatorStack:operators];
                     [operators push:UIAD_NUM_OP_OF(UIAD_NUM_OP_NOT_EQU)];
+                    canBeSign = YES;
                 }
                 else
                 {
@@ -4758,6 +4762,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     state = [self popWithOperator:UIAD_NUM_OP_OF(UIAD_NUM_OP_LA) operandStack:operands operatorStack:operators];
                     [operators push:UIAD_NUM_OP_OF(UIAD_NUM_OP_LA)];
                 }
+                canBeSign = YES;
                 break;
             case '<':
                 if (nextC == '=')
@@ -4771,6 +4776,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     state = [self popWithOperator:UIAD_NUM_OP_OF(UIAD_NUM_OP_LE) operandStack:operands operatorStack:operators];
                     [operators push:UIAD_NUM_OP_OF(UIAD_NUM_OP_LE)];
                 }
+                canBeSign = YES;
                 break;
             case '=':
                 if (nextC == '=')
@@ -4778,6 +4784,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     i ++;
                     state = [self popWithOperator:UIAD_NUM_OP_OF(UIAD_NUM_OP_EQU) operandStack:operands operatorStack:operators];
                     [operators push:UIAD_NUM_OP_OF(UIAD_NUM_OP_EQU)];
+                    canBeSign = YES;
                 }
                 else
                 {
@@ -4828,6 +4835,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                         if ([numberStr toDouble:&d])
                         {
                             [operands push:[NSNumber numberWithDouble:d]]; // 搜索到一个操作数
+                            newOperand = YES;
                         }
                         else
                         {
@@ -4985,6 +4993,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                         if (value && ([value isKindOfClass:[NSNumber class]] || [value isKindOfClass:[NSBool class]]))
                         {
                             [operands push:value];
+                            newOperand = YES;
                             i --; // 后面还要再加一次
                             break;
                         }
@@ -5009,7 +5018,8 @@ const int UIAD_NUM_OP_PRIORITY[] =
             return nil;
         }
         
-        shouldBeSign = c == '('; // 如果当前是左括号，下面的+或-就应该是正负号
+        // 如果是这些情况，下面的+或-就应该是正负号
+        shouldBeSign = !newOperand && canBeSign;
         i ++;
     }
     
