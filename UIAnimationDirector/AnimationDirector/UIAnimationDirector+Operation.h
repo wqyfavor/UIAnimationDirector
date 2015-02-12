@@ -1,22 +1,22 @@
 //
 //  UIAnimationDirector+Operation.h
-//  QQMSFContact
+//  mPaas
 //
 //  Created by bruiswang on 12-10-10.
 //
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-// 表达式解析使用的，外部可以注册NSBool类型的宏
-@interface NSBool : NSObject
+// 表达式解析使用的，外部可以注册NSADBool类型的宏
+@interface NSADBool : NSObject
 {
     BOOL _value;
 }
 
 @property BOOL value;
 
-+ (NSBool*)boolWithValue:(BOOL)value;
++ (NSADBool*)boolWithValue:(BOOL)value;
 - (void)setNot;
 
 @end

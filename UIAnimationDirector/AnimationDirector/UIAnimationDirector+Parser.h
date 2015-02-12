@@ -1,12 +1,12 @@
 //
 //  UIAnimationDirector+Parser.h
-//  QQMSFContact
+//  mPaas
 //
 //  Created by bruiswang on 12-10-9.
 //
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class UIADProgram;
 @class UIADOperation;

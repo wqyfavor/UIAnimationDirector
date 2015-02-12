@@ -1,6 +1,6 @@
 //
 //  UIAnimationDirector+Operation.m
-//  QQMSFContact
+//  mPaas
 //
 //  Created by bruiswang on 12-10-10.
 //
@@ -2254,9 +2254,9 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         }
         
         NSNumber* value = [[UIADPropertyValue valueAsNumberWithString:_expression] evaluateNumberWithObject:destObject context:context];
-        if (value && [value isKindOfClass:[NSBool class]])
+        if (value && [value isKindOfClass:[NSADBool class]])
         {
-            _inner_value = [(NSBool*)value value] ? UIAD_BOOL_TRUE : UIAD_BOOL_FALSE;
+            _inner_value = [(NSADBool*)value value] ? UIAD_BOOL_TRUE : UIAD_BOOL_FALSE;
         }
         else
         {
@@ -4053,13 +4053,13 @@ typedef NSNumber UIADOperator;
 
 @end
 
-@implementation NSBool
+@implementation NSADBool
 
 @synthesize value = _value;
 
-+ (NSBool*)boolWithValue:(BOOL)value
++ (NSADBool*)boolWithValue:(BOOL)value
 {
-    NSBool* r = [[NSBool alloc] init];
+    NSADBool* r = [[NSADBool alloc] init];
     r.value = value;
     return [r autorelease];
 }
@@ -4318,7 +4318,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
         ^(void)
         {
             id num = [operandStack pop];
-            if (num == nil || ![num isKindOfClass:[NSBool class]])
+            if (num == nil || ![num isKindOfClass:[NSADBool class]])
             {
                 return NO;
             }
@@ -4331,11 +4331,11 @@ const int UIAD_NUM_OP_PRIORITY[] =
         {
             id num1 = [operandStack pop];
             id num2 = [operandStack pop];
-            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSBool class]] || ![num2 isKindOfClass:[NSBool class]])
+            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSADBool class]] || ![num2 isKindOfClass:[NSADBool class]])
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[(NSBool*)num1 value] && [(NSBool*)num2 value]]];
+            [operandStack push:[NSADBool boolWithValue:[(NSADBool*)num1 value] && [(NSADBool*)num2 value]]];
             return YES;
         }, // UIAD_NUM_OP_AND
         
@@ -4343,11 +4343,11 @@ const int UIAD_NUM_OP_PRIORITY[] =
         {
             id num1 = [operandStack pop];
             id num2 = [operandStack pop];
-            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSBool class]] || ![num2 isKindOfClass:[NSBool class]])
+            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSADBool class]] || ![num2 isKindOfClass:[NSADBool class]])
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[(NSBool*)num1 value] || [(NSBool*)num2 value]]];
+            [operandStack push:[NSADBool boolWithValue:[(NSADBool*)num1 value] || [(NSADBool*)num2 value]]];
             return YES;
         }, // UIAD_NUM_OP_OR
         
@@ -4355,11 +4355,11 @@ const int UIAD_NUM_OP_PRIORITY[] =
         {
             id num1 = [operandStack pop];
             id num2 = [operandStack pop];
-            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSBool class]] || ![num2 isKindOfClass:[NSBool class]])
+            if (num1 == nil || num2 == nil || ![num1 isKindOfClass:[NSADBool class]] || ![num2 isKindOfClass:[NSADBool class]])
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[(NSBool*)num1 value] != [(NSBool*)num2 value]]];
+            [operandStack push:[NSADBool boolWithValue:[(NSADBool*)num1 value] != [(NSADBool*)num2 value]]];
             return YES;
         }, // UIAD_NUM_OP_XOR
         
@@ -4371,7 +4371,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] > [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] > [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_LA
         
@@ -4383,7 +4383,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] >= [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] >= [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_LA_E
         
@@ -4395,7 +4395,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] < [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] < [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_LE
         
@@ -4407,7 +4407,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] <= [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] <= [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_LE_E
 
@@ -4419,7 +4419,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] == [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] == [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_EQU
 
@@ -4431,7 +4431,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
             {
                 return NO;
             }
-            [operandStack push:[NSBool boolWithValue:[num2 doubleValue] != [num1 doubleValue]]];
+            [operandStack push:[NSADBool boolWithValue:[num2 doubleValue] != [num1 doubleValue]]];
             return YES;
         }, // UIAD_NUM_OP_NOT_EQU
 
@@ -4990,7 +4990,7 @@ const int UIAD_NUM_OP_PRIORITY[] =
                     {
                         NSString* macroStr = [_stringValue substringWithRange:NSMakeRange(initial, i - initial)];
                         id value = [UIADPropertyValue valueFromIdentifier:macroStr object:currentObject context:context];
-                        if (value && ([value isKindOfClass:[NSNumber class]] || [value isKindOfClass:[NSBool class]]))
+                        if (value && ([value isKindOfClass:[NSNumber class]] || [value isKindOfClass:[NSADBool class]]))
                         {
                             [operands push:value];
                             newOperand = YES;

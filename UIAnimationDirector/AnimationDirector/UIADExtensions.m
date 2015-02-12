@@ -1,6 +1,6 @@
 //
 //  UIADExtensions.m
-//  QQMSFContact
+//  mPaas
 //
 //  Created by bruiswang on 12-10-10.
 //
