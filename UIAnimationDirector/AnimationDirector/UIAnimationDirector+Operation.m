@@ -3078,7 +3078,7 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
                 else
                 {
                     [result release];
-                    return NO;
+                    return nil;
                 }
             }
             
