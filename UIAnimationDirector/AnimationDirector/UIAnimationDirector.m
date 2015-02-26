@@ -207,14 +207,23 @@
     }
 }
 
+- (void)resetAnimationThread
+{
+    if (_animationThread)
+    {
+        _animationThread.owner = nil;
+        if (![_animationThread isCancelled])
+        {
+            [_animationThread cancel];
+        }
+        [_animationThread release];
+        _animationThread = nil;
+    }
+}
+
 - (void)dealloc
 {
-    _animationThread.owner = nil;
-    if (_animationThread && ![_animationThread isCancelled])
-    {
-        [_animationThread cancel];
-        [_animationThread release];
-    }
+    [self resetAnimationThread];
     
     [_context release];
     [_script release];
@@ -290,14 +299,7 @@
             [_delegate shouldRegisterMacros:self];
         }
         
-        if (_animationThread)
-        {
-            if (![_animationThread isCancelled])
-            {
-                [_animationThread cancel];
-            }
-            [_animationThread release];
-        }
+        [self resetAnimationThread];
         
         _animationThread = [[UIAnimationThread alloc] init];
         _animationThread.owner = self;
@@ -316,12 +318,7 @@
 
 - (void)finish
 {
-    if (![_animationThread isCancelled])
-    {
-        [_animationThread cancel];
-    }
-    [_animationThread release];
-    _animationThread = nil;
+    [self resetAnimationThread];
     _running = NO;
 }
 

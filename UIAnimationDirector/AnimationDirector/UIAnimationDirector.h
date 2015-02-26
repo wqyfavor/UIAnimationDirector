@@ -14,7 +14,7 @@
 @protocol UIAnimationDirectorDelegate <NSObject>
 @optional
 - (void)didAnimationBegin:(UIAnimationDirector*)sender startTime:(NSTimeInterval)startTime timeRatio:(double)timeRatio;
-- (void)didAnimationFinish:(UIAnimationDirector*)sender;          // 动画执行完，注意，这个回调只是动画时间线里的操作都被执行了，不代表动画真正执行完
+- (void)didAnimationFinish:(UIAnimationDirector*)sender;          // 动画执行完或取消了，注意，这个回调只是动画时间线里的操作都被执行了，不代表动画真正执行完
 - (void)didAnimationExecutionFail:(UIAnimationDirector*)sender;   // 动画执行失败
 - (void)shouldRegisterExternalObjects:(UIAnimationDirector*)sender scene:(NSString*)scene;     // 注册外部对象到某个场景里
 - (void)shouldRegisterMacros:(UIAnimationDirector*)sender;
