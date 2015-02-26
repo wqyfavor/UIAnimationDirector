@@ -2900,13 +2900,15 @@ NSInteger compareTimeLine(id t1, id t2, void* context)
         {
             // 动画开始时执行脚本里的event事件
             context.animation = animation;
-            return [self assignCAAnimationEventProperties:parameter context:context start:YES];
+            if (![self assignCAAnimationEventProperties:parameter context:context start:YES])
+                return NO;
         }
         else if ([key isEqualToString:@"stopEvent"] && (parameter.type == UIAD_PROPERTY_VALUE_STRING || parameter.type == UIAD_PROPERTY_VALUE_ARRAY))
         {
             // 动画结束时执行脚本里的event事件
             context.animation = animation;
-            return [self assignCAAnimationEventProperties:parameter context:context start:NO];
+            if (![self assignCAAnimationEventProperties:parameter context:context start:NO])
+                return NO;
         }
         else if ([key isEqualToString:@"manually"] && parameter.type == UIAD_PROPERTY_VALUE_STRING)
         {
